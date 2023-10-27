@@ -10,7 +10,7 @@ const extratoEsquema = Joi.object({
   senha: Joi.number().integer().min(0).required()
 })
 
-router.get('/extrato', async (req, res) => {
+router.post('/extrato', async (req, res) => {
   const validationResult = extratoEsquema.validate(req.body)
   if (validationResult.error) {
     res.status(400).send(validationResult.error.details[0].message)
