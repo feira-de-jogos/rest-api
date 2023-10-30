@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const db = require('../db.js')
 
 router.post('/extrato', async (req, res) => {
+  console.log(req.body)
   const payload = req.body
   const { token, custom_data } = payload
   const ticket = await client.verifyIdToken({

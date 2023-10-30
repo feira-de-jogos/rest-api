@@ -8,6 +8,7 @@ const postDebito = require('./routes/postDebito')
 const postEstoque = require('./routes/postEstoque')
 const getEstoque = require('./routes/getEstoque')
 
+app.use(express.urlencoded({ extended: true }))
 app.use('/api/v1', postExtrato)
 app.use('/api/v1', postCredito)
 app.use('/api/v1', postDebito)
