@@ -7,12 +7,11 @@ const db = require('../db.js')
 
 router.post('/extrato', async (req, res) => {
   console.log(req.body)
-  const payload = req.body
-  const { token, custom_data } = payload
   const ticket = await client.verifyIdToken({
-    audience: 'pnkivbritoue59pbodppmifihnqe2tpt.apps.googleusercontent.com',
-    idToken: token.credential
+    audience: process.env.GOOGLE_CLIENT_ID,
+    idToken: req.body.credential
   })
+  console.log(ticket)
   console.log(ticket.getPayload())
 
   try {
