@@ -2,19 +2,17 @@ const express = require('express')
 const router = express.Router()
 const { OAuth2Client } = require('google-auth-library')
 const client = new OAuth2Client()
+const bodyParser = require('body-parser')
 const db = require('../db.js')
 
-async function verify () {
-  const ticket = await client.verifyIdToken({
-    idToken: 'token',
-    audience: 'pnkivbritoue59pbodppmifihnqe2tpt.apps.googleusercontent.com'
-  })
-  const payload = ticket.getPayload()
-  const userid = payload.sub
-}
-
 router.post('/extrato', async (req, res) => {
-  verify().catch(console.error)
+  const payload = req.body
+  const { token, custom_data } = payload
+  const ticket = await client.verifyIdToken({
+    audience: 'pnkivbritoue59pbodppmifihnqe2tpt.apps.googleusercontent.com',
+    idToken: token.credential
+  })
+  console.log(ticket.getPayload())
 
   try {
     const auth = await db.query('SELECT id FROM jogadores WHERE id = $1 AND senha = $2', [req.body.id, req.body.senha])
