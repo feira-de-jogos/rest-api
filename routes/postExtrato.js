@@ -2,29 +2,28 @@ const express = require('express')
 const router = express.Router()
 const { OAuth2Client } = require('google-auth-library')
 const client = new OAuth2Client()
-const bodyParser = require('body-parser')
 const db = require('../db.js')
+const audience = process.env.GOOGLE_CLIENT_ID
 
 router.post('/extrato', async (req, res) => {
-  console.log(req.body)
-  const ticket = await client.verifyIdToken({
-    audience: process.env.GOOGLE_CLIENT_ID,
-    idToken: req.body.credential
-  })
-  console.log(ticket)
-  console.log(ticket.getPayload())
-
   try {
-    const auth = await db.query('SELECT id FROM jogadores WHERE id = $1 AND senha = $2', [req.body.id, req.body.senha])
+    const ticket = await client.verifyIdToken({
+      audience,
+      idToken: req.body.credential
+    })
+    const payload = ticket.getPayload()
+
+    const auth = await db.query('SELECT id FROM jogadores WHERE email = $1', [payload.email])
     if (auth.rowCount === 0) {
       res.sendStatus(401)
       return
     }
 
-    let receitas = await db.query('SELECT jogos.nome AS jogo, to_char(receitas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, receitas.valor FROM receitas INNER JOIN jogos ON jogos.id = receitas.jogo_id WHERE receitas.jogador_id = $1', [req.body.id])
+    const id = auth.rows[0].id
+    let receitas = await db.query('SELECT jogos.nome AS jogo, to_char(receitas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, receitas.valor FROM receitas INNER JOIN jogos ON jogos.id = receitas.jogo_id WHERE receitas.jogador_id = $1', [id])
     receitas = { receitas: receitas.rows }
 
-    let despesas = await db.query('SELECT produtos.descricao AS produto, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, despesas.valor FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = $1', [req.body.id])
+    let despesas = await db.query('SELECT produtos.descricao AS produto, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, despesas.valor FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = $1', [id])
     despesas = { despesas: despesas.rows }
 
     res.json({
