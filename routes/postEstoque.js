@@ -27,16 +27,16 @@ router.post('/estoque', async (req, res) => {
 
   let estoque
   if (req.body.produto && req.body.quantidade) {
-    const produto = await db.query('SELECT id from produtos WHERE id = $1', [req.body.produto])
+    const produto = await db.query('SELECT id FROM produtos WHERE id = $1', [req.body.produto])
     if (produto.rowCount === 0) {
       res.sendStatus(400)
       return
     }
 
     try {
-      estoque = await db.query('SELECT id from estoque WHERE maquina_id = $1 AND produto_id = $2', [req.body.maquina, req.body.produto])
+      estoque = await db.query('SELECT id FROM estoque WHERE maquina_id = $1 AND produto_id = $2', [req.body.maquina, req.body.produto])
       if (estoque.rowCount === 0) {
-        await db.query('INSERT into estoque(maquina_id, produto_id, quantidade) VALUES($1, $2, $3)', [req.body.maquina, req.body.produto, req.body.quantidade])
+        await db.query('INSERT INTO estoque (maquina_id, produto_id, quantidade) VALUES ($1, $2, $3)', [req.body.maquina, req.body.produto, req.body.quantidade])
       } else {
         await db.query('UPDATE estoque SET quantidade = $1 WHERE maquina_id = $2 AND produto_id = $3', [req.body.quantidade, req.body.maquina, req.body.produto])
       }
