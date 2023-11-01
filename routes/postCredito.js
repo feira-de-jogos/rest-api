@@ -26,7 +26,7 @@ router.post('/credito', async (req, res) => {
   }
 
   try {
-    const credito = await db.query('INSERT INTO receitas (jogador_id, jogo_id, valor, data) values ($1, $2, $3, NOW())', [req.body.id, req.body.jogo, req.body.valor])
+    const credito = await db.query('INSERT INTO receitas (jogador_id, jogo_id, valor, data) VALUES ($1, $2, $3, NOW())', [req.body.id, req.body.jogo, req.body.valor])
     res.json(credito)
   } catch (err) {
     res.sendStatus(500)
