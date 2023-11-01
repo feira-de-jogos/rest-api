@@ -8,9 +8,9 @@ const db = require('../db.js')
 const estoqueEsquema = Joi.object({
   maquina: Joi.number().integer().min(0).required(),
   senha: Joi.number().integer().min(0).required(),
-  produto: Joi.number().integer().min(0).required(),
-  quantidade: Joi.number().integer().min(0).required()
-})
+  produto: Joi.number().integer().min(0).optional(),
+  quantidade: Joi.number().integer().min(0).optional()
+}).required()
 
 router.post('/estoque', async (req, res) => {
   const validationResult = estoqueEsquema.validate(req.body)
@@ -19,29 +19,34 @@ router.post('/estoque', async (req, res) => {
     return
   }
 
-  try {
-    const auth = await db.query('SELECT id FROM maquinas WHERE id = $1 AND senha = $2', [req.body.maquina, req.body.senha])
-    if (auth.rowCount === 0) {
-      res.sendStatus(401)
-      return
-    }
+  const auth = await db.query('SELECT id FROM maquinas WHERE id = $1 AND senha = $2', [req.body.maquina, req.body.senha])
+  if (auth.rowCount === 0) {
+    res.sendStatus(401)
+    return
+  }
 
-    const produto = await db.query('SELECT * from produtos WHERE id = $1', [req.body.produto])
+  let estoque
+  if (req.body.produto && req.body.quantidade) {
+    const produto = await db.query('SELECT id from produtos WHERE id = $1', [req.body.produto])
     if (produto.rowCount === 0) {
       res.sendStatus(400)
       return
     }
 
-    const estoque = await db.query('SELECT * from estoque WHERE maquina_id = $1 AND produto_id = $2', [req.body.maquina, req.body.produto])
-    if (estoque.rowCount === 0) {
-      await db.query('INSERT into estoque(maquina_id, produto_id, quantidade) VALUES($1, $2, $3)', [req.body.maquina, req.body.produto, req.body.quantidade])
-    } else {
-      await db.query('UPDATE estoque SET quantidade = $1 WHERE maquina_id = $2 AND produto_id = $3', [req.body.quantidade, req.body.maquina, req.body.produto])
+    try {
+      estoque = await db.query('SELECT id from estoque WHERE maquina_id = $1 AND produto_id = $2', [req.body.maquina, req.body.produto])
+      if (estoque.rowCount === 0) {
+        await db.query('INSERT into estoque(maquina_id, produto_id, quantidade) VALUES($1, $2, $3)', [req.body.maquina, req.body.produto, req.body.quantidade])
+      } else {
+        await db.query('UPDATE estoque SET quantidade = $1 WHERE maquina_id = $2 AND produto_id = $3', [req.body.quantidade, req.body.maquina, req.body.produto])
+      }
+    } catch (err) {
+      res.sendStatus(500)
     }
-    res.sendStatus(200)
-  } catch (err) {
-    res.sendStatus(500)
   }
+
+  estoque = await db.query('SELECT produtos.id, produtos.descricao, estoque.quantidade FROM estoque INNER JOIN produtos ON estoque.produto_id = produtos.id WHERE maquina_id = $1', [req.body.maquina])
+  res.json({ estoque: estoque.rows })
 })
 
 module.exports = router

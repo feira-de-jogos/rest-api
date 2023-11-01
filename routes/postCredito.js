@@ -10,7 +10,7 @@ const creditoEsquema = Joi.object({
   senha: Joi.number().integer().min(0).required(),
   jogo: Joi.number().integer().min(0).required(),
   valor: Joi.number().integer().min(1).required()
-})
+}).required()
 
 router.post('/credito', async (req, res) => {
   const validationResult = creditoEsquema.validate(req.body)
@@ -19,15 +19,14 @@ router.post('/credito', async (req, res) => {
     return
   }
 
+  const auth = await db.query('SELECT id FROM jogadores WHERE id = $1 AND senha = $2', [req.body.id, req.body.senha])
+  if (auth.rowCount === 0) {
+    res.sendStatus(401)
+    return
+  }
+
   try {
-    const auth = await db.query('SELECT id FROM jogadores WHERE id = $1 AND senha = $2', [req.body.id, req.body.senha])
-    if (auth.rowCount === 0) {
-      res.sendStatus(401)
-      return
-    }
-
     const credito = await db.query('INSERT INTO receitas (jogador_id, jogo_id, valor, data) values ($1, $2, $3, NOW())', [req.body.id, req.body.jogo, req.body.valor])
-
     res.json(credito)
   } catch (err) {
     res.sendStatus(500)
