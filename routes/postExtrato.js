@@ -19,7 +19,7 @@ router.post('/extrato', async (req, res) => {
       senha = Math.round(Math.random() * 8999 + 1000) // [0, 1] -> [1000, 9999]
       id = await db.query('INSERT INTO jogadores (apelido, senha, email) VALUES ($1, $2, $3) RETURNING id', [payload.name, senha, payload.email])
     }
-    id = id.rows[0].id
+    // id = id.rows[0].id
 
     let receitas = await db.query('SELECT jogos.nome AS jogo, to_char(receitas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, receitas.valor FROM receitas INNER JOIN jogos ON jogos.id = receitas.jogo_id WHERE receitas.jogador_id = $1', [id.rows[0].id])
     receitas = { receitas: receitas.rows }
@@ -27,26 +27,6 @@ router.post('/extrato', async (req, res) => {
     let despesas = await db.query('SELECT produtos.descricao AS produto, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, despesas.valor FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = $1', [id.rows[0].id])
     despesas = { despesas: despesas.rows }
 
-    /* const pagehtml = `
-    <!DOCTYPE html>
-      <html lang="en">
-
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Banco: Login</title>
-        <link rel="shortcut icon" href="./img/Banco-Imagem.png" type="image/png">
-
-      </head>
-
-      <body>
-      <h1>${receitas}</h1>
-      <h1>${despesas}</h1>
-      </body>
-
-      </html>
-    `
-    res.send(pagehtml) */
     res.json({
       ...id.rows[0],
       ...receitas,
