@@ -148,12 +148,13 @@ router.post('/extrato', async (req, res) => {
     extratoMontado.rows.forEach(row => {
       const tipoLower = row.tipo.toLowerCase()
       const tipoExibicao = tipoLower === 'receita' ? 'Valor ganho' : 'Valor gasto'
+      const tipoExibicao2 = tipoLower === 'receita' ? 'Jogo' : 'Produto comprado'
       const dataFormatada = row.data
 
       pagehtml += `
         <div class="${tipoLower}-container">
           <p><strong>Tipo:</strong> ${row.tipo}</p>
-          <p><strong>Transação:</strong> ${row.transacao}</p>
+          <p><strong>${tipoExibicao2}:</strong> ${row.transacao}</p>
           <p><strong>${tipoExibicao}:</strong> ${row.valor} Tijolinhos</p>
           <p><strong>Data:</strong> ${dataFormatada} </p>
         </div>
