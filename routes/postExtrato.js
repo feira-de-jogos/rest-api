@@ -27,10 +27,24 @@ router.post('/extrato', async (req, res) => {
     let despesas = await db.query('SELECT produtos.descricao AS produto, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, despesas.valor FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = $1', [id.rows[0].id])
     despesas = { despesas: despesas.rows }
 
+    const htmlpage = `
+                    
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Document</title>
+        </head>
+        <body>
+          ${receitas}
+          ${despesas}
+        </body>
+        </html>
+    `
+
     res.send({
-      ...id.rows[0],
-      ...receitas,
-      ...despesas
+      htmlpage
     })
   } catch (err) {
     res.sendStatus(500)
