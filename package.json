@@ -16,7 +16,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "google-auth-library": "^9.2.0"
   },
-  "name": "feira-de-jogos-nuvem",
+  "name": "feira-de-jogos-nuvem-api",
   "scripts": {
     "start": "node servidor.js"
   },
