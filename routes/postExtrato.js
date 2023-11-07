@@ -138,22 +138,27 @@ router.post('/extrato', async (req, res) => {
         }
 
         @media (max-width: 768px) {
-          /* Estilos específicos para telas menores */
           .nav-bar {
-            padding: 5px;
+            padding: 10px; /* Aumenta o preenchimento para criar mais espaço em branco */
           }
           .nav-links li {
-            margin: 0 5px;
+            margin: 0 10px;
           }
           .nav-links a {
-            font-size: 12px;
+            font-size: 16px; /* Aumenta o tamanho da fonte para maior legibilidade */
           }
           .user-actions a {
-            font-size: 12px;
-            margin-left: 5px;
+            font-size: 16px;
+            margin-left: 10px;
           }
           .saldo {
-            font-size: 12px;
+            font-size: 16px;
+          }
+        }
+        @media (max-width: 768px) {
+          .nav-links a {
+            font-size: 16px;
+            padding: 10px 15px; /* Adicione preenchimento para criar uma área de toque maior */
           }
         }
         </style>
@@ -161,10 +166,7 @@ router.post('/extrato', async (req, res) => {
       <body>
       <div class="nav-bar">
         <ul class="nav-links">
-            <li><a href="/receitas">Receitas</a></li>
-            <li><a href="/despesas">Despesas</a></li>
             <li><a href="/extrato">Extrato</a></li>
-            <li><a href="/produtos">Produtos</a></li>
         </ul>
         <div class="user-actions">
            <p class="saldo">Saldo: TJ$ ${totalReceitas - totalDespesas}</p>
