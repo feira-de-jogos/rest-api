@@ -37,8 +37,7 @@ router.post('/extrato', async (req, res) => {
           <title>Document</title>
         </head>
         <body>
-          ${receitas}
-          ${despesas}
+          so html
         </body>
         </html>
     `
