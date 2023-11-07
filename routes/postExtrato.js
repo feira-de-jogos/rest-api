@@ -27,69 +27,26 @@ router.post('/extrato', async (req, res) => {
     let despesas = await db.query('SELECT produtos.descricao AS produto, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, despesas.valor FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = $1', [id.rows[0].id])
     despesas = { despesas: despesas.rows }
 
-    let saldo = 0
-    for (const receita of receitas.rows) {
-      saldo += receita.valor
-    }
-    for (const despesa of despesas.rows) {
-      saldo -= despesa.valor
-    }
+    const pagehtml = `
+    <!DOCTYPE html>
+      <html lang="en">
 
-    let pagehtml = `
-      <!DOCTYPE html>
-      <html>
       <head>
-        <style>
-          // Your CSS styles here...
-        </style>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Banco: Login</title>
+        <link rel="shortcut icon" href="./img/Banco-Imagem.png" type="image/png">
+
       </head>
+
       <body>
-        <div class="nav-bar">
-          <ul class="nav-links">
-              <li><a href="/receitas">Receitas</a></li>
-              <li><a href="/despesas">Despesas</a></li>
-              <li><a href="/extrato">Extrato</a></li>
-              <li><a href="/produtos">Produtos</a></li>
-          </ul>
-          <div class="user-actions">
-             <p class="saldo">Saldo: TJ$ ${saldo}</p>
-          </div>
-        </div>
-        <div class="container">
-          <h1>Extrato</h1>
-    `
-
-    // Now, loop through receitas and despesas to display the transaction details
-    receitas.rows.forEach((row) => {
-      const dataFormatada = row.data
-
-      pagehtml += `
-        <div class="receita-container">
-          <p><strong>Produto:</strong> ${row.produto}</p>
-          <p><strong>Data:</strong> ${dataFormatada}</p>
-          <p><strong>Valor:</strong> ${row.valor} Tijolinhos</p>
-        </div>
-      `
-    })
-
-    despesas.rows.forEach((row) => {
-      const dataFormatada = row.data
-
-      pagehtml += `
-        <div class="despesa-container">
-          <p><strong>Produto:</strong> ${row.produto}</p>
-          <p><strong>Data:</strong> ${dataFormatada}</p>
-          <p><strong>Valor:</strong> ${row.valor} Tijolinhos</p>
-        </div>
-      `
-    })
-
-    pagehtml += `
-      </div>
+      <h1>${receitas}</h1>
+      <h1>${despesas}</h1>
       </body>
-      </html>
-    `
 
+      </html>
+    
+    `
     res.send(pagehtml)
   } catch (err) {
     res.sendStatus(500)
