@@ -65,7 +65,7 @@ router.post('/extrato', async (req, res) => {
 
       pagehtml += `
         <div class="receita-container">
-          <p><strong>Jogo:</strong> ${row.jogo}</p>
+          <p><strong>Produto:</strong> ${row.produto}</p>
           <p><strong>Data:</strong> ${dataFormatada}</p>
           <p><strong>Valor:</strong> ${row.valor} Tijolinhos</p>
         </div>
