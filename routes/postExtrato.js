@@ -27,22 +27,46 @@ router.post('/extrato', async (req, res) => {
     let despesas = await db.query('SELECT produtos.descricao AS produto, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, despesas.valor FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = $1', [id.rows[0].id])
     despesas = { despesas: despesas.rows }
 
+    const formatReceitas = receitas.receitas.map((receita) => {
+      return `
+        <div>
+          <p>Jogo: ${receita.jogo}</p>
+          <p>Data: ${receita.data}</p>
+          <p>Valor: ${receita.valor}</p>
+        </div>
+      `
+    }).join('')
+
+    const formatDespesas = despesas.despesas.map((despesa) => {
+      return `
+        <div>
+          <p>Produto: ${despesa.produto}</p>
+          <p>Data: ${despesa.data}</p>
+          <p>Valor: ${despesa.valor}</p>
+        </div>
+      `
+    }).join('')
+
+    // Crie a página HTML com os dados formatados
     const htmlpage = `
-                    
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Document</title>
-        </head>
-        <body>
-          ${despesas}
-          ${receitas}
-        </body>
-        </html>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Extrato</title>
+      </head>
+      <body>
+        <h1>Extrato</h1>
+        <h2>Receitas</h2>
+        ${formatReceitas}
+        <h2>Despesas</h2>
+        ${formatDespesas}
+      </body>
+      </html>
     `
 
+    // Envie a página HTML formatada como resposta
     res.send(htmlpage)
   } catch (err) {
     res.sendStatus(500)
