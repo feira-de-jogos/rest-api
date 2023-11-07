@@ -135,9 +135,7 @@ router.post('/extrato', async (req, res) => {
           color: #333;
           font-size: 18px;
           font-weight: bold;
-        }
-        .nav-links li:nth-child(3) {
-          margin-top: 4px; /* Ajuste conforme necessário para alinhar com o saldo */
+          margin-bottom: 10px;
         }
         @media (max-width: 768px) {
           .nav-bar {
