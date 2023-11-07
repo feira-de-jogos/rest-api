@@ -138,7 +138,7 @@ router.post('/extrato', async (req, res) => {
             <li><a href="/produtos">Produtos</a></li>
         </ul>
         <div class="user-actions">
-           <p class="saldo">Saldo: TJ$ ${receitas - despesas}</p>
+           <p class="saldo">Saldo: TJ$ </p>
         </div>
       </div>
       <div class="container">
