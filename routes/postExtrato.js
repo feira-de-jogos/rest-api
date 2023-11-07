@@ -27,7 +27,7 @@ router.post('/extrato', async (req, res) => {
     let despesas = await db.query('SELECT produtos.descricao AS produto, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, despesas.valor FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = $1', [id.rows[0].id])
     despesas = { despesas: despesas.rows }
 
-    res.json({
+    res.send({
       ...id.rows[0],
       ...receitas,
       ...despesas
