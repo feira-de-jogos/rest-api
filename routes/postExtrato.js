@@ -37,14 +37,13 @@ router.post('/extrato', async (req, res) => {
           <title>Document</title>
         </head>
         <body>
-          so html
+          ${despesas}
+          ${receitas}
         </body>
         </html>
     `
 
-    res.send({
-      htmlpage
-    })
+    res.send(htmlpage)
   } catch (err) {
     res.sendStatus(500)
   }
