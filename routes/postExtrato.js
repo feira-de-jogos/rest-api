@@ -27,11 +27,11 @@ router.post('/extrato', async (req, res) => {
     // let despesas = await db.query('SELECT produtos.descricao AS produto, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, despesas.valor FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = $1', [id.rows[0].id])
     // despesas = { despesas: despesas.rows }
 
-    let receitas = await db.query('SELECT SUM(valor) FROM receitas WHERE jogador_id = (SELECT id FROM jogador WHERE id = $1)', [id.rows[0].id])
-    receitas = parseInt(receitas.rows[0].sum)
+    const receitas = await db.query('SELECT SUM(valor) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
+    let totalReceitas = parseInt(receitas.rows[0].sum)
 
-    let despesas = await db.query('SELECT SUM(valor) FROM despesas WHERE jogador_id = (SELECT id FROM jogador WHERE id = $1)', [id.rows[0].id])
-    despesas = parseInt(despesas.rows[0].sum)
+    const despesas = await db.query('SELECT SUM(valor) FROM despesas WHERE jogador_id = $1', [id.rows[0].id])
+    let totalDespesas = parseInt(despesas.rows[0].sum)
 
     const extratoMontado = await db.query('SELECT \'Receita\' AS tipo, jogos.nome AS transacao, receitas.valor AS valor, to_char(receitas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data FROM receitas INNER JOIN jogos ON jogos.id = receitas.jogo_id WHERE receitas.jogador_id = (SELECT id FROM jogadores WHERE id = $1) UNION ALL SELECT \'Despesa\' AS tipo, produtos.descricao AS transacao, despesas.valor AS valor, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = (SELECT id FROM jogadores WHERE id = $1) ORDER BY data DESC;', [id.rows[0].id])
 
