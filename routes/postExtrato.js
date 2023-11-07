@@ -19,7 +19,7 @@ router.post('/extrato', async (req, res) => {
       senha = Math.round(Math.random() * 8999 + 1000) // [0, 1] -> [1000, 9999]
       id = await db.query('INSERT INTO jogadores (apelido, senha, email) VALUES ($1, $2, $3) RETURNING id', [payload.name, senha, payload.email])
     }
-    // id = id.rows[0].id
+    id = id.rows[0].id
 
     // let receitas = await db.query('SELECT jogos.nome AS jogo, to_char(receitas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data, receitas.valor FROM receitas INNER JOIN jogos ON jogos.id = receitas.jogo_id WHERE receitas.jogador_id = $1', [id.rows[0].id])
     // receitas = { receitas: receitas.rows }
