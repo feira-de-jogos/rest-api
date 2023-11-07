@@ -136,7 +136,9 @@ router.post('/extrato', async (req, res) => {
           font-size: 18px;
           font-weight: bold;
         }
-
+        .nav-links li:nth-child(3) {
+          margin-top: 4px; /* Ajuste conforme necessário para alinhar com o saldo */
+        }
         @media (max-width: 768px) {
           .nav-bar {
             padding: 10px; /* Aumenta o preenchimento para criar mais espaço em branco */
@@ -166,7 +168,7 @@ router.post('/extrato', async (req, res) => {
       <body>
       <div class="nav-bar">
         <ul class="nav-links">
-            <li><a href="/extrato">Extrato</a></li>
+            <li><a href="/api/v1/extrato">Extrato</a></li>
         </ul>
         <div class="user-actions">
            <p class="saldo">Saldo: TJ$ ${totalReceitas - totalDespesas}</p>
