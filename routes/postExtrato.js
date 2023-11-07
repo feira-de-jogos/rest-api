@@ -39,6 +39,9 @@ router.post('/extrato', async (req, res) => {
       <!DOCTYPE html>
       <html>
       <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Extrato</title>
         <style>
         * {
           margin: 0;
@@ -132,6 +135,26 @@ router.post('/extrato', async (req, res) => {
           color: #333;
           font-size: 18px;
           font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+          /* Estilos específicos para telas menores */
+          .nav-bar {
+            padding: 5px;
+          }
+          .nav-links li {
+            margin: 0 5px;
+          }
+          .nav-links a {
+            font-size: 12px;
+          }
+          .user-actions a {
+            font-size: 12px;
+            margin-left: 5px;
+          }
+          .saldo {
+            font-size: 12px;
+          }
         }
         </style>
       </head>
