@@ -13,7 +13,8 @@ router.post('/extrato', async (req, res) => {
     })
     const payload = ticket.getPayload()
 
-    console.log('window.localStorage.getItem("token")')
+    // eslint-disable-next-line prefer-const
+    let tokenValor = window.localStorage.getItem('token')
     let senha
     let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {
@@ -166,7 +167,7 @@ router.post('/extrato', async (req, res) => {
       <body>
       <div class="nav-bar">
         <ul class="nav-links">
-            <li><a href="/api/v1/extrato">Extrato</a></li>
+            <li><a href="/api/v1/extrato">Extrato ${tokenValor}</a></li>
         </ul>
         <div class="user-actions">
            <p class="saldo">Saldo: TJ$ ${totalReceitas - totalDespesas}</p>
