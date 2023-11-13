@@ -213,6 +213,26 @@ h1 {
   }
   
 }
+@media (max-width: 768px) {
+  .container {
+    padding: 10px; /* Reduza o preenchimento para criar mais espaço em branco */
+  }
+
+  .tipoLower-container {
+    flex-direction: column;
+    align-items: center; /* Centralize os elementos na coluna */
+  }
+
+  .info-container {
+    width: 100%; /* Faça com que as caixas ocupem 100% da largura */
+    margin: 0 0 20px 0;
+  }
+
+  #senha,
+  #mudar-senha {
+    width: 100%; /* Faça com que as caixas ocupem 100% da largura */
+  }
+}
 
   </style>
 </head>
