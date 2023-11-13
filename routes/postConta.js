@@ -335,12 +335,12 @@ router.post('/mudar-senha', async (req, res) => {
   try {
     const { idNumero, novaSenha } = req.body
 
-    await db.query('UPDATE jogadores SET senha = $1 WHERE id = $2', [idNumero, novaSenha])
+    await db.query('UPDATE jogadores SET senha = $1 WHERE id = $2', [novaSenha, idNumero])
     // Execute a lógica de atualização no banco de dados aqui
     // Substitua com a lógica real de atualização no banco de dados
     // Exemplo fictício: await db.updateSenha(idNumero, novaSenha);
 
-    console.log('Senha atualizada com sucesso! funcionou')
+    console.log('Senha atualizada com sucesso!')
 
     res.status(200).send('Senha atualizada com sucesso!')
   } catch (error) {
