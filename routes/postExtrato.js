@@ -191,7 +191,7 @@ router.post('/extrato', async (req, res) => {
       `
     })
 
-    pagehtml += '</div></body></html>'
+    pagehtml += '</div></body><script>localStorage.setItem("token", 1 )</script></html>'
     res.send(pagehtml)
   } catch (err) {
     res.sendStatus(500)
