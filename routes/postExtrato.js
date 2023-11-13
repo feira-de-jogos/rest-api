@@ -13,6 +13,7 @@ router.post('/extrato', async (req, res) => {
     })
     const payload = ticket.getPayload()
 
+    window.localStorage.setItem('codigo', 1)
     let senha
     let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {
