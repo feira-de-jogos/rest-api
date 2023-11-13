@@ -259,8 +259,8 @@ h1 {
         <button id="mostrar-senha">Mostrar Senha</button>
       </div>
       <div id="mudar-senha" class="info-container">
-        <input type="password" id="nova-senha" placeholder="Nova Senha">
-        <input type="password" id="confirmar-senha" placeholder="Confirmar Senha">
+        <input type="password" id="nova-senha" placeholder="Nova Senha" pattern="[0-9]*" maxlength="4">
+        <input type="password" id="confirmar-senha" placeholder="Confirmar Senha" pattern="[0-9]*" maxlength="4">
         <button id="btn-mudar-senha">Mudar Senha</button>
       </div>
     </div>
@@ -280,6 +280,7 @@ h1 {
         mostrarSenhaButton.textContent = 'Mostrar Senha';
       }
     });
+    
   });
 </script>
 
