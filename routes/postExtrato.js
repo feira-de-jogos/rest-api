@@ -47,7 +47,7 @@ router.get('/extrato', async (req, res) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Extrato</title>
-      <link rel="shortcut icon" href="../frontend/img/Banco-Imagem.png" type="image/png">
+      <link rel="icon" href="/img/Banco-Imagem.ico" type="image/ico">
         <style>
         * {
           margin: 0;
