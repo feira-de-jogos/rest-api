@@ -31,6 +31,8 @@ router.get('/conta', async (req, res) => {
       res.redirect('/')
       return
     }
+    let idNumero = await db.query('SELECT id FROM jogadores WHERE email = $1', [payload.email])
+    idNumero = idNumero[0].id
     const receitas = await db.query('SELECT SUM(valor) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
     const totalReceitas = parseInt(receitas.rows[0].sum)
 
@@ -231,7 +233,7 @@ h1 {
         <p><strong>Nome:</strong> ${payload.name}</p>
       </div>
       <div id="id-container" class="info-container">
-        <p><strong>ID:</strong> ${id}</p>
+        <p><strong>ID:</strong> ${idNumero}</p>
       </div>
       <div id="senha" class="info-container">
         <p><strong>Senha:</strong> **********</p>
