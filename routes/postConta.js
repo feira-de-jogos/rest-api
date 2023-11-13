@@ -13,7 +13,7 @@ router.use(session({
   cookie: { secure: false } // Configurações do cookie (pode precisar ser ajustado para produção)
 }))
 
-router.post('/conta', async (req, res) => {
+router.get('/conta', async (req, res) => {
   try {
     if (req.session.token == null || req.session.token === '') {
       console.log('Usuário não autenticado. Redirecionando para login')
