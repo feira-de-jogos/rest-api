@@ -13,7 +13,7 @@ router.use(session({
   cookie: { secure: false } // Configurações do cookie (pode precisar ser ajustado para produção)
 }))
 
-router.get('/extrato', async (req, res) => {
+router.post('/conta', async (req, res) => {
   try {
     if (req.session.token == null || req.session.token === '') {
       console.log('Usuário não autenticado. Redirecionando para login')
@@ -25,75 +25,42 @@ router.get('/extrato', async (req, res) => {
       idToken: req.session.token
     })
     const payload = ticket.getPayload()
-
     // eslint-disable-next-line prefer-const
     let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {
       res.redirect('/')
       return
     }
-
     const receitas = await db.query('SELECT SUM(valor) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
     const totalReceitas = parseInt(receitas.rows[0].sum)
 
     const despesas = await db.query('SELECT SUM(valor) FROM despesas WHERE jogador_id = $1', [id.rows[0].id])
     const totalDespesas = parseInt(despesas.rows[0].sum)
 
-    const extratoMontado = await db.query('SELECT \'Receita\' AS tipo, jogos.nome AS transacao, receitas.valor AS valor, to_char(receitas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data FROM receitas INNER JOIN jogos ON jogos.id = receitas.jogo_id WHERE receitas.jogador_id = (SELECT id FROM jogadores WHERE id = $1) UNION ALL SELECT \'Despesa\' AS tipo, produtos.descricao AS transacao, despesas.valor AS valor, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = (SELECT id FROM jogadores WHERE id = $1) ORDER BY data DESC;', [id.rows[0].id])
+    // eslint-disable-next-line prefer-const
     let pagehtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Extrato</title>
-      <link rel="shortcut icon" href="../frontend/img/Banco-Imagem.png" type="image/png">
-        <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        body {
-          font-family: Arial, sans-serif;
-          background-color: #f5f5f5;
-        }
-        .container {
-          align-items: center;
-          background-color: #ffffff;
-          margin: 20px;
-          padding: 20px;
-          border-radius: 10px;
-          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-          max-width: 800px;
-          width: 100%;
-          margin-top: 50px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-        .receita-container, .despesa-container {
-          background-color: #ffffff;
-          margin-bottom: 20px;
-          padding: 20px;
-          border-radius: 10px;
-          border: 1px solid #eaeaea;
-        }
-        .receita-container p, .despesa-container p {
-          margin: 5px 0;
-          color: #333;
-        }
-        h1 {
-          text-align: center;
-          padding-bottom: 20px;
-          color: #333;
-        }
-        .receita-container {
-          border-left: 5px solid #00a400;
-        }
-        .despesa-container {
-          border-left: 5px solid #e84855;
-        }
-        .nav-bar {
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha Conta</title>
+  <link rel="shortcut icon" href="../frontend/img/Banco-Imagem.png" type="image/png">
+  <style>
+    /* Reset de estilos */
+body, h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Barra de navegação */
+.nav-bar {
           background-color: #fff;
           border-bottom: 1px solid #ddd;
           padding: 10px;
@@ -167,39 +134,121 @@ router.get('/extrato', async (req, res) => {
             padding: 10px 15px; /* Adicione preenchimento para criar uma área de toque maior */
           }
         }
-        </style>
-      </head>
-      <body>
-      <div class="nav-bar">
-        <ul class="nav-links">
-            <li><a href="/api/v1/extrato">Extrato</a></li>
-            <li><a href="/api/v1/conta">Conta</a></li>
-        </ul>
-        <div class="user-actions">
-           <p class="saldo">Saldo: TJ$ ${totalReceitas - totalDespesas}</p>
-        </div>
+
+/* Container principal */
+.container {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+/* Título */
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Contêiner de informações */
+.tipoLower-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.info-container {
+  flex: 1;
+  background-color: #ffffff;
+  margin: 0 10px 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.info-container p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+/* Botão para mostrar senha */
+#mostrar-senha,
+#btn-mudar-senha {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#mostrar-senha:hover,
+#btn-mudar-senha:hover {
+  background-color: #45a049;
+}
+
+/* Campos de senha */
+#nova-senha,
+#confirmar-senha {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .tipoLower-container {
+    flex-direction: column;
+  }
+
+  .info-container {
+    margin-right: 0;
+  }
+  
+}
+
+  </style>
+</head>
+<body>
+  <div class="nav-bar">
+    <ul class="nav-links">
+        <li><a href="/api/v1/extrato">Extrato</a></li>
+        <li><a href="/api/v1/conta">Conta</a></li>
+    </ul>
+    <div class="user-actions">
+       <p class="saldo">Saldo: TJ$ ${totalReceitas - totalDespesas}</p>
+    </div>
+  </div>
+  <div class="container">
+    <h1>Minha Conta</h1>
+    <div class="tipoLower-container">
+      <div id="nome-container" class="info-container">
+        <p><strong>Nome:</strong> ${payload.name}</p>
       </div>
-      <div class="container">
-        <h1>Extrato</h1>
+      <div id="id-container" class="info-container">
+        <p><strong>ID:</strong> ${id}</p>
+      </div>
+      <div id="senha" class="info-container">
+        <p><strong>Senha:</strong> **********</p>
+        <button id="mostrar-senha">Mostrar Senha</button>
+      </div>
+      <div id="mudar-senha" class="info-container">
+        <input type="password" id="nova-senha" placeholder="Nova Senha">
+        <input type="password" id="confirmar-senha" placeholder="Confirmar Senha">
+        <button id="btn-mudar-senha">Mudar Senha</button>
+      </div>
+    </div>
+  </div>
+  <script src="../frontend/js/script.js"></script> <!-- Adicione o caminho correto para o seu arquivo JavaScript -->
+</body>
+</html>
+
     `
-
-    extratoMontado.rows.forEach(row => {
-      const tipoLower = row.tipo.toLowerCase()
-      const tipoExibicao = tipoLower === 'receita' ? 'Valor ganho' : 'Valor gasto'
-      const tipoExibicao2 = tipoLower === 'receita' ? 'Jogo' : 'Produto comprado'
-      const dataFormatada = row.data
-
-      pagehtml += `
-        <div class="${tipoLower}-container">
-          <p><strong>Tipo:</strong> ${row.tipo}</p>
-          <p><strong>${tipoExibicao2}:</strong> ${row.transacao}</p>
-          <p><strong>${tipoExibicao}:</strong> ${row.valor} Tijolinhos</p>
-          <p><strong>Data:</strong> ${dataFormatada} </p>
-        </div>
-      `
-    })
-
-    pagehtml += '</div></body></html>'
     res.send(pagehtml)
   } catch (err) {
     res.sendStatus(500)
