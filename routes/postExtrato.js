@@ -13,8 +13,6 @@ router.post('/extrato', async (req, res) => {
     })
     const payload = ticket.getPayload()
 
-    const variavelTeste = '113e'
-
     let senha
     let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {
@@ -193,7 +191,7 @@ router.post('/extrato', async (req, res) => {
       `
     })
 
-    pagehtml += `</div></body><script>localStorage.setItem("token", ${variavelTeste} ); console.log(${req.body.credential})</script></html>`
+    pagehtml += `</div></body><script>localStorage.setItem("token", "${req.body.credential}" )")</script></html>`
     res.send(pagehtml)
   } catch (err) {
     res.sendStatus(500)
