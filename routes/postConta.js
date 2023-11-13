@@ -280,6 +280,43 @@ h1 {
         mostrarSenhaButton.textContent = 'Mostrar Senha';
       }
     });
+
+    const mudarSenhaButton = document.getElementById('btn-mudar-senha');
+    const novaSenhaInput = document.getElementById('nova-senha');
+    const confirmarSenhaInput = document.getElementById('confirmar-senha');
+    
+    mudarSenhaButton.addEventListener('click', async function () {
+      const novaSenha = novaSenhaInput.value;
+      const confirmarSenha = confirmarSenhaInput.value;
+  
+      // Verifica se os campos de senha não estão vazios e se a senha nova e a confirmação coincidem
+      if (novaSenha !== '' && novaSenha === confirmarSenha) {
+        try {
+          const idNumero = ${idNumero}; // Substitua com a maneira correta de obter o ID
+        const response = await fetch('/api/v1/mudar-senha', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ idNumero, novaSenha }),
+        });
+
+        if (response.ok) {
+          console.log('Senha atualizada com sucesso!');
+        } else {
+          console.error('Erro ao atualizar a senha:', response.statusText);
+        }
+        } catch (error) {
+          console.error('Erro ao atualizar a senha:', error);
+        }
+  
+        // Limpa os campos de senha
+        novaSenhaInput.value = '';
+        confirmarSenhaInput.value = '';
+      } else {
+        alert('Os campos de senha devem ser preenchidos e as senhas devem coincidir.');
+      }
+    });
     
   });
 </script>
@@ -291,6 +328,24 @@ h1 {
     res.send(pagehtml)
   } catch (err) {
     res.sendStatus(500)
+  }
+})
+
+router.post('/mudar-senha', async (req, res) => {
+  try {
+    const { idNumero, novaSenha } = req.body
+
+    await db.query('UPDATE jogadores SET senha = $1 WHERE id = $2', [idNumero, novaSenha])
+    // Execute a lógica de atualização no banco de dados aqui
+    // Substitua com a lógica real de atualização no banco de dados
+    // Exemplo fictício: await db.updateSenha(idNumero, novaSenha);
+
+    console.log('Senha atualizada com sucesso!')
+
+    res.status(200).send('Senha atualizada com sucesso!')
+  } catch (error) {
+    console.error('Erro ao atualizar a senha:', error)
+    res.status(500).send('Erro ao atualizar a senha')
   }
 })
 
