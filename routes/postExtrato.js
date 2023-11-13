@@ -13,7 +13,7 @@ router.use(session({
   cookie: { secure: false } // Configurações do cookie (pode precisar ser ajustado para produção)
 }))
 
-router.post('/extrato', async (req, res) => {
+router.get('/extrato', async (req, res) => {
   try {
     let idTokenn
     if (req.session.token != null) {
