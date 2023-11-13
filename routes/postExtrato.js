@@ -16,7 +16,9 @@ router.use(session({
 router.get('/extrato', async (req, res) => {
   try {
     if (req.session.token == null || req.session.token === '') {
+      console.log('Usuário não autenticado. Redirecionando para login')
       res.redirect('/')
+      return
     }
     const ticket = await client.verifyIdToken({
       audience,
