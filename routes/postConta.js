@@ -201,21 +201,11 @@ h1 {
   margin-bottom: 10px;
   box-sizing: border-box;
 }
-
 /* Responsividade */
-@media (max-width: 768px) {
-  .tipoLower-container {
-    flex-direction: column;
-  }
-
-  .info-container {
-    margin-right: 0;
-  }
-  
-}
 @media (max-width: 768px) {
   .container {
     padding: 10px; /* Reduza o preenchimento para criar mais espaço em branco */
+    margin: 0 auto; /* Centralize o container horizontalmente */
   }
 
   .tipoLower-container {
@@ -226,11 +216,19 @@ h1 {
   .info-container {
     width: 100%; /* Faça com que as caixas ocupem 100% da largura */
     margin: 0 0 20px 0;
+    box-sizing: border-box; /* Inclua a borda no tamanho total da caixa */
   }
 
   #senha,
   #mudar-senha {
     width: 100%; /* Faça com que as caixas ocupem 100% da largura */
+  }
+
+  /* Ajuste o tamanho da fonte nas boxes */
+  .info-container p,
+  #mostrar-senha,
+  #btn-mudar-senha {
+    font-size: 14px;
   }
 }
 
