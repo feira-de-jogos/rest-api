@@ -342,7 +342,7 @@ router.post('/mudar-senha', async (req, res) => {
 
     console.log('Senha atualizada com sucesso!')
 
-    res.redirect('/api/v1/conta')
+    res.redirect('https://feira-de-jogos.sj.ifsc.edu.br/api/v1/conta')
   } catch (error) {
     console.error('Erro ao atualizar a senha:', error)
     res.status(500).send('Erro ao atualizar a senha')
