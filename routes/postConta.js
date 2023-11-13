@@ -204,28 +204,28 @@ h1 {
 /* Responsividade */
 @media (max-width: 768px) {
   .container {
-    padding: 10px; /* Reduza o preenchimento para criar mais espaço em branco */
-    margin: 0 auto; /* Centralize o container horizontalmente */
+    padding: 10px;
+    margin: 0 auto;
+    max-width: 100%; /* Ocupa 100% da largura da tela */
+    box-sizing: border-box;
   }
 
   .tipoLower-container {
     flex-direction: column;
-    align-items: center; /* Centralize os elementos na coluna */
+    align-items: center;
   }
 
   .info-container {
-    width: 100%; /* Faça com que as caixas ocupem 100% da largura */
-    margin: 0 0 20px 0;
-    box-sizing: border-box; /* Inclua a borda no tamanho total da caixa */
+    width: calc(100% - 20px); /* Reduz a largura para acomodar margens e evitar estouro */
+    margin: 0 0 10px 0; /* Reduz a margem inferior */
+    box-sizing: border-box;
   }
 
   #senha,
   #mudar-senha {
-    width: 100%; /* Faça com que as caixas ocupem 100% da largura */
+    width: calc(100% - 20px); /* Reduz a largura para acomodar margens e evitar estouro */
   }
 
-  /* Ajuste o tamanho da fonte nas boxes */
-  .info-container p,
   #mostrar-senha,
   #btn-mudar-senha {
     font-size: 14px;
