@@ -55,7 +55,7 @@ body, h1, h2, h3, p {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: Arial, sans-serif;
   background-color: #f5f5f5;
   color: #333;
 }
@@ -76,6 +76,7 @@ body {
           margin: 10px 0;
           display: flex;
           flex-wrap: wrap;
+          padding: 0px;
         }
         .nav-links li {
           margin: 0 20px;
@@ -245,7 +246,6 @@ h1 {
       </div>
     </div>
   </div>
-  <script src="../frontend/js/script.js"></script> <!-- Adicione o caminho correto para o seu arquivo JavaScript -->
 </body>
 </html>
 
