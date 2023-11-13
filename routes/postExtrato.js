@@ -170,6 +170,7 @@ router.get('/extrato', async (req, res) => {
       <div class="nav-bar">
         <ul class="nav-links">
             <li><a href="/api/v1/extrato">Extrato</a></li>
+            <li><a href="/api/v1/conta">Conta</a></li>
         </ul>
         <div class="user-actions">
            <p class="saldo">Saldo: TJ$ ${totalReceitas - totalDespesas}</p>
