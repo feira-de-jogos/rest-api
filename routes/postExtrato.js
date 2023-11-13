@@ -7,11 +7,9 @@ const audience = process.env.GOOGLE_CLIENT_ID
 
 router.post('/extrato', async (req, res) => {
   try {
-    // eslint-disable-next-line prefer-const
-    let token = window.localStorage.setItem('token', req.body.credential)
     const ticket = await client.verifyIdToken({
       audience,
-      idToken: token
+      idToken: req.body.credential
     })
     const payload = ticket.getPayload()
 
