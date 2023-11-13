@@ -340,7 +340,7 @@ router.post('/mudar-senha', async (req, res) => {
     // Substitua com a lógica real de atualização no banco de dados
     // Exemplo fictício: await db.updateSenha(idNumero, novaSenha);
 
-    console.log('Senha atualizada com sucesso!')
+    console.log('Senha atualizada com sucesso! funcionou')
 
     res.status(200).send('Senha atualizada com sucesso!')
   } catch (error) {
