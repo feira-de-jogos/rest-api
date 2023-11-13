@@ -15,7 +15,7 @@ router.use(session({
 
 router.get('/extrato', async (req, res) => {
   try {
-    if (req.session.token == null) {
+    if (req.session.token == null || req.session.token === '') {
       res.redirect('/')
     }
     const ticket = await client.verifyIdToken({
