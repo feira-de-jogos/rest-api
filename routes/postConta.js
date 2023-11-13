@@ -255,7 +255,7 @@ h1 {
         <p><strong>ID:</strong> ${idNumero}</p>
       </div>
       <div id="senha" class="info-container">
-        <p><strong>Senha:</strong> ****</p>
+      <p><strong>Senha:</strong> <span id="senha-oculta">****</span></p>
         <button id="mostrar-senha">Mostrar Senha</button>
       </div>
       <div id="mudar-senha" class="info-container">
@@ -268,17 +268,13 @@ h1 {
 
   <script>
   document.addEventListener('DOMContentLoaded', function () {
-  const mostrarSenhaButton = document.getElementById('mostrar-senha');
-  const senhaOculta = ${senha};
-
-  mostrarSenhaButton.addEventListener('click', function () {
-    if (senhaOculta.style.display === 'none' || senhaOculta.style.display === '') {
-      senhaOculta.style.display = 'inline';
-    } else {
-      senhaOculta.style.display = 'none';
-    }
+    const mostrarSenhaButton = document.getElementById('mostrar-senha');
+    const senhaOculta = document.getElementById('senha-oculta');
+  
+    mostrarSenhaButton.addEventListener('click', function () {
+      senhaOculta.textContent = 'Senha:' + '${senha}';
+    });
   });
-});
 </script>
 
 </body>
