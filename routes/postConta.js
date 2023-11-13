@@ -272,7 +272,13 @@ h1 {
     const senhaOculta = document.getElementById('senha-oculta');
   
     mostrarSenhaButton.addEventListener('click', function () {
-      senhaOculta.textContent = '${senha}';
+      if (senhaOculta.textContent === '****') {
+        senhaOculta.textContent = '${senha}';
+        mostrarSenhaButton.textContent = 'Ocultar Senha';
+      } else {
+        senhaOculta.textContent = '****';
+        mostrarSenhaButton.textContent = 'Mostrar Senha';
+      }
     });
   });
 </script>
