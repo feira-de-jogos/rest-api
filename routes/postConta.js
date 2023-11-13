@@ -31,7 +31,7 @@ router.get('/conta', async (req, res) => {
       res.redirect('/')
       return
     }
-    const idNumero = id[0].id
+    const idNumero = id.rows[0].id
     const receitas = await db.query('SELECT SUM(valor) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
     const totalReceitas = parseInt(receitas.rows[0].sum)
 
