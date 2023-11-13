@@ -301,10 +301,14 @@ h1 {
           body: JSON.stringify({ idNumero, novaSenha }),
         });
 
-        if (response.ok) {
+        const result = await response.json();
+
+        if (result.success) {
           console.log('Senha atualizada com sucesso!');
+          // Recarrega a página
+          location.reload();
         } else {
-          console.error('Erro ao atualizar a senha:', response.statusText);
+          console.error('Erro ao atualizar a senha:', result.error);
         }
         } catch (error) {
           console.error('Erro ao atualizar a senha:', error);
@@ -341,8 +345,7 @@ router.post('/mudar-senha', async (req, res) => {
     // Exemplo fictício: await db.updateSenha(idNumero, novaSenha);
 
     console.log('Senha atualizada com sucesso!')
-
-    res.redirect('https://feira-de-jogos.sj.ifsc.edu.br/api/v1/conta')
+    res.status(200).send('Senha atualizada com sucesso!')
   } catch (error) {
     console.error('Erro ao atualizar a senha:', error)
     res.status(500).send('Erro ao atualizar a senha')
