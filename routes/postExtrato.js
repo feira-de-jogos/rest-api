@@ -15,9 +15,16 @@ router.use(session({
 
 router.post('/extrato', async (req, res) => {
   try {
+    let idTokenn
+    if (req.session.token != null) {
+      idTokenn = req.session.token
+    } else {
+      idTokenn = req.body.credential
+    }
+
     const ticket = await client.verifyIdToken({
       audience,
-      idToken: req.body.credential
+      idToken: idTokenn
     })
     const payload = ticket.getPayload()
 
