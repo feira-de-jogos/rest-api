@@ -13,8 +13,6 @@ router.post('/extrato', async (req, res) => {
     })
     const payload = ticket.getPayload()
 
-    // eslint-disable-next-line prefer-const
-    let tokenValor = window.localStorage.getItem('token')
     let senha
     let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {
@@ -167,7 +165,7 @@ router.post('/extrato', async (req, res) => {
       <body>
       <div class="nav-bar">
         <ul class="nav-links">
-            <li><a href="/api/v1/extrato">Extrato ${tokenValor}</a></li>
+            <li><a href="/api/v1/extrato">Extrato</a></li>
         </ul>
         <div class="user-actions">
            <p class="saldo">Saldo: TJ$ ${totalReceitas - totalDespesas}</p>
@@ -193,7 +191,7 @@ router.post('/extrato', async (req, res) => {
       `
     })
 
-    pagehtml += `</div></body><script>localStorage.setItem("token", "${req.body.credential}")</script></html>`
+    pagehtml += '</div></body></html>'
     res.send(pagehtml)
   } catch (err) {
     res.sendStatus(500)
