@@ -1,9 +1,17 @@
 const express = require('express')
+const session = require('express-session')
 const router = express.Router()
 const { OAuth2Client } = require('google-auth-library')
 const client = new OAuth2Client()
 const db = require('../db.js')
 const audience = process.env.GOOGLE_CLIENT_ID
+
+router.use(session({
+  secret: 'O1iP4BTe4ApgxLhAbeZPGnbjZOzH2fmg', // Troque isso por uma chave secreta forte
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Configurações do cookie (pode precisar ser ajustado para produção)
+}))
 
 router.post('/extrato', async (req, res) => {
   try {
@@ -32,7 +40,7 @@ router.post('/extrato', async (req, res) => {
     const totalDespesas = parseInt(despesas.rows[0].sum)
 
     const extratoMontado = await db.query('SELECT \'Receita\' AS tipo, jogos.nome AS transacao, receitas.valor AS valor, to_char(receitas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data FROM receitas INNER JOIN jogos ON jogos.id = receitas.jogo_id WHERE receitas.jogador_id = (SELECT id FROM jogadores WHERE id = $1) UNION ALL SELECT \'Despesa\' AS tipo, produtos.descricao AS transacao, despesas.valor AS valor, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = (SELECT id FROM jogadores WHERE id = $1) ORDER BY data DESC;', [id.rows[0].id])
-
+    req.session.token = req.body.credential
     let pagehtml = `
       <!DOCTYPE html>
       <html>
@@ -191,7 +199,7 @@ router.post('/extrato', async (req, res) => {
       `
     })
 
-    pagehtml += '</div></body></html>'
+    pagehtml += `</div><script>console.log("${req.session.token}")</script></body></html>`
     res.send(pagehtml)
   } catch (err) {
     res.sendStatus(500)
