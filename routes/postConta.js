@@ -32,6 +32,7 @@ router.get('/conta', async (req, res) => {
       return
     }
     const idNumero = id.rows[0].id
+    const senha = id.rows[0].senha
     const receitas = await db.query('SELECT SUM(valor) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
     const totalReceitas = parseInt(receitas.rows[0].sum)
 
@@ -254,7 +255,7 @@ h1 {
         <p><strong>ID:</strong> ${idNumero}</p>
       </div>
       <div id="senha" class="info-container">
-        <p><strong>Senha:</strong> **********</p>
+        <p><strong>Senha:</strong> ****</p>
         <button id="mostrar-senha">Mostrar Senha</button>
       </div>
       <div id="mudar-senha" class="info-container">
@@ -264,6 +265,22 @@ h1 {
       </div>
     </div>
   </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+  const mostrarSenhaButton = document.getElementById('mostrar-senha');
+  const senhaOculta = ${senha};
+
+  mostrarSenhaButton.addEventListener('click', function () {
+    if (senhaOculta.style.display === 'none' || senhaOculta.style.display === '') {
+      senhaOculta.style.display = 'inline';
+    } else {
+      senhaOculta.style.display = 'none';
+    }
+  });
+});
+</script>
+
 </body>
 </html>
 
