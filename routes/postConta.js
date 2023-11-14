@@ -176,6 +176,22 @@ h1 {
   font-size: 16px;
 }
 
+.botaoSair {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px;
+  background-color: #ff4d4d; /* Vermelho */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s; /* Adiciona uma transição suave para a mudança de cor */
+}
+
+.botaoSair:hover {
+  background-color: #cc0000; /* Vermelho mais escuro ao passar o mouse */
+}
+
 /* Botão para mostrar senha */
 #mostrar-senha,
 #btn-mudar-senha {
@@ -264,8 +280,8 @@ h1 {
         <button id="btn-mudar-senha">Mudar Senha</button>
       </div>
     </div>
+    <button id="btn-sair-conta" class="botaoSair">Sair da Conta</button>
   </div>
-
   <script>
   document.addEventListener('DOMContentLoaded', function () {
     const mostrarSenhaButton = document.getElementById('mostrar-senha');
@@ -321,6 +337,30 @@ h1 {
         alert('Os campos de senha devem ser preenchidos e as senhas devem coincidir.');
       }
     });
+
+    const botaoSair = document.getElementById('btn-sair-conta');
+
+    botaoSair.addEventListener('click', function () {
+      // Limpa o token da sessão
+      fetch('/api/v1/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(result => {
+          if (result.success) {
+            // Redireciona para a página desejada após o logout
+            window.location.href = 'https://feira-de-jogos.sj.ifsc.edu.br';
+          } else {
+            console.error('Erro ao fazer logout:', result.error);
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao fazer logout:', error);
+        });
+    });
     
   });
 </script>
@@ -347,6 +387,14 @@ router.post('/mudar-senha', async (req, res) => {
     console.error('Erro ao atualizar a senha:', error)
     res.status(500).send('Erro ao atualizar a senha')
   }
+})
+
+router.post('/logout', (req, res) => {
+  // Limpar a sessão
+  req.session.token = null
+
+  // Enviar uma resposta JSON indicando sucesso
+  res.json({ success: true })
 })
 
 module.exports = router
