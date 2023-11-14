@@ -10,6 +10,7 @@ const postDebito = require('./routes/postDebito')
 const postEstoque = require('./routes/postEstoque')
 const postAutenticacao = require('./routes/postAutenticacao')
 const postConta = require('./routes/postConta')
+const postPix = require('./routes/postPix')
 
 app.use(cors({
   origin: [
@@ -26,4 +27,5 @@ app.use('/api/v1', postDebito)
 app.use('/api/v1', postEstoque)
 app.use('/api/v1', postAutenticacao)
 app.use('/api/v1', postConta)
+app.use('/api/v1', postPix)
 app.listen(port, () => { console.log(`Server running at http://localhost:${port}/`) })

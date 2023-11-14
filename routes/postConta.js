@@ -221,7 +221,7 @@ h1 {
 @media (max-width: 768px) {
   .container {
     padding: 10px;
-    margin: 0 auto;
+    margin: 10px auto;
     max-width: 100%; /* Ocupa 100% da largura da tela */
     box-sizing: border-box;
   }
