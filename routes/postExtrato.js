@@ -110,7 +110,7 @@ router.get('/extrato', async (req, res) => {
           flex-wrap: wrap;
         }
         .nav-links li {
-          margin: 0 20px;
+          margin: 0 10px;
         }
         .nav-links a {
           text-decoration: none;
@@ -146,25 +146,24 @@ router.get('/extrato', async (req, res) => {
         @media (max-width: 768px) {
           .nav-bar {
             padding: 10px; /* Aumenta o preenchimento para criar mais espaço em branco */
+            flex-wrap: wrap;
           }
           .nav-links li {
-            margin: 0 10px;
+            margin: 0 0px;
           }
           .nav-links a {
             font-size: 16px; /* Aumenta o tamanho da fonte para maior legibilidade */
+            padding: 10px 15px;
           }
           .user-actions a {
             font-size: 16px;
             margin-left: 10px;
+            order: -1;
+            margin-top: 0;
           }
           .saldo {
             font-size: 16px;
-          }
-        }
-        @media (max-width: 768px) {
-          .nav-links a {
-            font-size: 16px;
-            padding: 10px 15px; /* Adicione preenchimento para criar uma área de toque maior */
+            margin-left: auto;
           }
         }
         </style>
@@ -173,6 +172,7 @@ router.get('/extrato', async (req, res) => {
       <div class="nav-bar">
         <ul class="nav-links">
             <li><a href="/api/v1/extrato">Extrato</a></li>
+            <li><a href="/api/v1/pix">Pix</a></li>
             <li><a href="/api/v1/conta">Conta</a></li>
         </ul>
         <div class="user-actions">
