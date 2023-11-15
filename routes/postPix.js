@@ -311,10 +311,10 @@ router.post('/enviar-pix', async (req, res) => {
       return
     }
     const receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [idNumero])
-    const totalReceitas = parseInt(receitas.rows[0].sum)
+    const totalReceitas = parseInt(receitas.rows[0].coalesce)
 
     const despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [idNumero])
-    const totalDespesas = parseInt(despesas.rows[0].sum)
+    const totalDespesas = parseInt(despesas.rows[0].coalesce)
 
     if ((totalReceitas - totalDespesas) < amount) {
       res.json({ result: 2, message: 'Saldo Insuficiente' })
