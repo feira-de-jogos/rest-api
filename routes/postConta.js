@@ -33,10 +33,10 @@ router.get('/conta', async (req, res) => {
     }
     const idNumero = id.rows[0].id
     const senha = id.rows[0].senha
-    const receitas = await db.query('SELECT SUM(valor) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
+    const receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
     const totalReceitas = parseInt(receitas.rows[0].sum)
 
-    const despesas = await db.query('SELECT SUM(valor) FROM despesas WHERE jogador_id = $1', [id.rows[0].id])
+    const despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [id.rows[0].id])
     const totalDespesas = parseInt(despesas.rows[0].sum)
 
     // eslint-disable-next-line prefer-const
@@ -340,7 +340,6 @@ h1 {
         alert('As senhas devem coincidir.');
       } else if (!numericRegex.test(novaSenha) || !numericRegex.test(confirmarSenha)) {
         alert("Por favor, insira apenas números nas senhas.");
-        return false;
       }
     });
 
