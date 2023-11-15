@@ -34,10 +34,10 @@ router.get('/extrato', async (req, res) => {
     }
 
     const receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
-    const totalReceitas = parseInt(receitas.rows[0].sum)
+    const totalReceitas = parseInt(receitas.rows[0].coalesce)
 
     const despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [id.rows[0].id])
-    const totalDespesas = parseInt(despesas.rows[0].sum)
+    const totalDespesas = parseInt(despesas.rows[0].coalesce)
 
     const extratoMontado = await db.query('SELECT \'Receita\' AS tipo, jogos.nome AS transacao, receitas.valor AS valor, to_char(receitas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data FROM receitas INNER JOIN jogos ON jogos.id = receitas.jogo_id WHERE receitas.jogador_id = (SELECT id FROM jogadores WHERE id = $1) UNION ALL SELECT \'Despesa\' AS tipo, produtos.descricao AS transacao, despesas.valor AS valor, to_char(despesas.data, \'DD/MM/YYYY HH24:MI:SS\') AS data FROM despesas INNER JOIN produtos ON produtos.id = despesas.produto_id WHERE despesas.jogador_id = (SELECT id FROM jogadores WHERE id = $1) ORDER BY data DESC;', [id.rows[0].id])
     let pagehtml = `
@@ -192,7 +192,7 @@ router.get('/extrato', async (req, res) => {
     extratoMontado.rows.forEach(row => {
       const tipoLower = row.tipo.toLowerCase()
       const tipoExibicao = tipoLower === 'receita' ? 'Valor ganho' : 'Valor gasto'
-      const tipoExibicao2 = tipoLower === 'receita' ? 'Recebeu através de' : 'Gastou com'
+      const tipoExibicao2 = tipoLower === 'receita' ? 'Recebeu através de' : 'Gastou'
       const dataFormatada = row.data
 
       pagehtml += `

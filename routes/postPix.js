@@ -33,13 +33,12 @@ router.get('/pix', async (req, res) => {
     }
     const idNumero = id.rows[0].id
     const senha = id.rows[0].senha
-    // const idNumero = id.rows[0].id
-    // const senha = id.rows[0].senha
-    const receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
-    const totalReceitas = parseInt(receitas.rows[0].sum)
 
-    const despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [id.rows[0].id])
-    const totalDespesas = parseInt(despesas.rows[0].sum)
+    const receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [idNumero])
+    const totalReceitas = parseInt(receitas.rows[0].coalesce)
+
+    const despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [idNumero])
+    const totalDespesas = parseInt(despesas.rows[0].coalesce)
 
     // eslint-disable-next-line prefer-const
     let pagehtml = `
