@@ -258,15 +258,20 @@ body {
 
         if (resultado.result == 1) {
           alert(resultado.message)
-          //location.reload();
+          userIDInput.value = '';
         } else if(resultado.result == 2){
           alert(resultado.message)
+          amountInput.value = '';
         } else if(resultado.result == 3){
           alert(resultado.message)
+          amountInput.value = '';
         }else if(resultado.result == 4){
           alert(resultado.message)
+          amountInput.value = '';
+        } else if(resultado.result == 4){
+          alert(resultado.message)
           location.reload()
-        } else{
+        }else{
           console.error('Erro ao atualizar a senha:', result.error);
         }
 
@@ -275,8 +280,6 @@ body {
         }
   
         // Limpa os campos de senha
-        userIDInput.value = '';
-        amountInput.value = '';
         passwordInput.value = '';
       } else if(userID == '' || amount == '' || password == ''){
         alert('Todos os dados devem ser preenchidos');
@@ -326,11 +329,14 @@ router.post('/enviar-pix', async (req, res) => {
       res.json({ result: 3, message: 'Não é possivel enviar um pix para você mesmo!' })
       return
     }
+    if (amount < 1) {
+      res.json({ result: 4, message: 'Você não pode enviar um valor abaixo de 1 tijolinho' })
+    }
     await db.query('INSERT INTO receitas (jogador_id, jogo_id, valor, data) VALUES ($1, 13, $2, NOW())', [userID, amount])
     await db.query('INSERT INTO despesas (jogador_id, produto_id, valor, data) VALUES ($1, 5, $2, NOW())', [idNumero, amount])
 
     console.log('Pix Enviado')
-    res.json({ result: 4, message: 'Pix enviado com sucesso!' })
+    res.json({ result: 5, message: 'Pix enviado com sucesso!' })
   } catch (error) {
     console.error('Erro ao atualizar a senha:', error)
     res.status(500).send('Erro ao atualizar a senha')
