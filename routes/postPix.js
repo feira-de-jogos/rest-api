@@ -268,7 +268,7 @@ body {
         }else if(resultado.result == 4){
           alert(resultado.message)
           amountInput.value = '';
-        } else if(resultado.result == 4){
+        } else if(resultado.result == 5){
           alert(resultado.message)
           location.reload()
         }else{
