@@ -192,7 +192,7 @@ router.get('/extrato', async (req, res) => {
     extratoMontado.rows.forEach(row => {
       const tipoLower = row.tipo.toLowerCase()
       const tipoExibicao = tipoLower === 'receita' ? 'Valor ganho' : 'Valor gasto'
-      const tipoExibicao2 = tipoLower === 'receita' ? 'Recebeu através de' : 'Gastou'
+      const tipoExibicao2 = tipoLower === 'receita' ? 'Recebeu através de' : 'Gastou com'
       const dataFormatada = row.data
 
       pagehtml += `
