@@ -304,9 +304,12 @@ h1 {
     mudarSenhaButton.addEventListener('click', async function () {
       const novaSenha = novaSenhaInput.value;
       const confirmarSenha = confirmarSenhaInput.value;
+      var numericRegex = /^[0-9]+$/;
+  
+      
   
       // Verifica se os campos de senha não estão vazios e se a senha nova e a confirmação coincidem
-      if (novaSenha !== '' && novaSenha === confirmarSenha) {
+      if (novaSenha !== '' && novaSenha === confirmarSenha && numericRegex.test(novaSenha)) {
         try {
           const idNumero = ${idNumero}; // Substitua com a maneira correta de obter o ID
         const response = await fetch('/api/v1/mudar-senha', {
@@ -333,8 +336,11 @@ h1 {
         // Limpa os campos de senha
         novaSenhaInput.value = '';
         confirmarSenhaInput.value = '';
-      } else {
-        alert('Os campos de senha devem ser preenchidos e as senhas devem coincidir.');
+      } else if(novaSenha != confirmarSenha){
+        alert('As senhas devem coincidir.');
+      } else if (!numericRegex.test(novaSenha) || !numericRegex.test(confirmarSenha)) {
+        alert("Por favor, insira apenas números nas senhas.");
+        return false;
       }
     });
 
