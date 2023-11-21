@@ -325,6 +325,7 @@ h1 {
         if (result.success) {
           console.log('Senha atualizada com sucesso!');
           // Recarrega a página
+          alert("Senha atualizada com sucesso!");
           location.reload();
         } else {
           console.error('Erro ao atualizar a senha:', result.error);
