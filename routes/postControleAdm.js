@@ -13,7 +13,7 @@ router.use(session({
   cookie: { secure: false } // Configurações do cookie (pode precisar ser ajustado para produção)
 }))
 
-router.get('/pix', async (req, res) => {
+router.get('/adm', async (req, res) => {
   try {
     if (req.session.token == null || req.session.token === '') {
       console.log('Usuário não autenticado. Redirecionando para login')
@@ -34,6 +34,12 @@ router.get('/pix', async (req, res) => {
     const idNumero = id.rows[0].id
     const senha = id.rows[0].senha
 
+    // eslint-disable-next-line eqeqeq
+    if (idNumero !== 2 && idNumero !== 1 && idNumero !== 17) {
+      res.redirect('/api/v1/extrato')
+      return
+    }
+
     const receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [idNumero])
     const totalReceitas = parseInt(receitas.rows[0].coalesce)
 
@@ -47,7 +53,7 @@ router.get('/pix', async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pix</title>
+  <title>Minha Conta</title>
   <link rel="icon" href="/img/Banco-Imagem.ico" type="image/ico">
   <style>
     /* Reset de estilos */
@@ -166,7 +172,28 @@ body {
           button:hover {
             background-color: #2652c0;
           }
-          
+          /* Add or modify these CSS styles */
+            .forms label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            }
+
+            .forms select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            }
+
+            .option{
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            margin: 0 auto;
+            }
         @media (max-width: 768px) {
           .nav-bar {
             padding: 10px; /* Aumenta o preenchimento para criar mais espaço em branco */
@@ -212,8 +239,16 @@ body {
     </div>
   </div>
   <div class="container">
-    <h1>Pix</h1>
+    <h1>Funções de administrador</h1>
+    
+    
+
     <div class="forms">
+    <label for="operation">Escolha o Modo:</label>
+    <select name="operation" id="operation">
+    <option value="alterarEstoque">Alterar estoque</option>
+    <option value="alterarValor">Alterar valor</option>
+    </select>
     <label for="userId">ID do usuário a receber:</label>
     <input type="number" id="userId" name="userId" required inputmode="numeric" pattern="[0-9]*" maxlength="4">
 
@@ -226,6 +261,8 @@ body {
     <button id="btn-enviar-pix">Enviar Pix</button>
     </div>
   </div>
+
+  
   
   <script>
   document.addEventListener('DOMContentLoaded', function () {

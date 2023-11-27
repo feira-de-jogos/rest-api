@@ -11,6 +11,7 @@ const postEstoque = require('./routes/postEstoque')
 const postAutenticacao = require('./routes/postAutenticacao')
 const postConta = require('./routes/postConta')
 const postPix = require('./routes/postPix')
+const postControleAdm = require('./routes/postControleAdm')
 
 app.use(cors({
   origin: [
@@ -28,4 +29,5 @@ app.use('/api/v1', postEstoque)
 app.use('/api/v1', postAutenticacao)
 app.use('/api/v1', postConta)
 app.use('/api/v1', postPix)
+app.use('/api/v1', postControleAdm)
 app.listen(port, () => { console.log(`Server running at http://localhost:${port}/`) })
