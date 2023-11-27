@@ -8,9 +8,8 @@ const db = require('../db.js')
 const debitoEsquema = Joi.object({
   id: Joi.number().integer().min(0).required(),
   senha: Joi.number().integer().min(0).required(),
-  produto: Joi.number().integer().min(0).required(),
-  valor: Joi.number().integer().min(1).required(),
-  maquina: Joi.number().integer().min(0).required()
+  maquina: Joi.number().integer().min(0).required(),
+  produto: Joi.number().integer().min(0).required()
 }).required()
 
 router.post('/debito', async (req, res) => {
@@ -33,18 +32,19 @@ router.post('/debito', async (req, res) => {
     let despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [req.body.id])
     despesas = parseInt(despesas.rows[0].sum)
 
-    const produto = await db.query('SELECT id FROM produtos WHERE id = $1 AND EXISTS (SELECT 1 FROM estoque WHERE maquina_id = $2 AND produto_id = produtos.id AND quantidade > 0);', [req.body.produto, req.body.maquina])
+    const produto = await db.query('SELECT id, valor FROM produtos WHERE id = $1 AND EXISTS (SELECT 1 FROM estoque WHERE maquina_id = $2 AND produto_id = produtos.id AND quantidade > 0);', [req.body.produto, req.body.maquina])
     if (produto.rowCount === 0) {
       res.sendStatus(403)
       return
     }
+    const valor = produto.rows[0].valor
 
-    if ((receitas - despesas) < req.body.valor) {
+    if ((receitas - despesas) < valor) {
       res.sendStatus(403)
       return
     }
 
-    await db.query('INSERT INTO despesas (jogador_id, produto_id, valor, data) VALUES ($1, $2, $3, NOW())', [req.body.id, req.body.produto, req.body.valor])
+    await db.query('INSERT INTO despesas (jogador_id, produto_id, valor, data) VALUES ($1, $2, $3, NOW())', [req.body.id, req.body.produto, valor])
     await db.query('UPDATE estoque SET quantidade = quantidade - 1 WHERE produto_id = $1;', [req.body.produto])
     res.sendStatus(200)
   } catch (error) {
