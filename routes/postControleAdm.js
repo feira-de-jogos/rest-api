@@ -46,6 +46,16 @@ router.get('/adm', async (req, res) => {
     const despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [idNumero])
     const totalDespesas = parseInt(despesas.rows[0].coalesce)
 
+    const relacaoProdutoEstoque = await db.query('SELECT produtos.*, estoque.quantidade, estoque.maquina_id FROM produtos JOIN estoque ON produtos.id = estoque.produto_id ORDER BY produtos.descricao;')
+
+    let tableHtml = '<table border="1">'
+    tableHtml += '<tr><th>ID</th><th>Descrição</th><th>Valor</th><th>Quantidade</th><th>Maquina ID</th></tr>'
+
+    for (const produtoEstoque of relacaoProdutoEstoque.rows) {
+      tableHtml += `<tr><td>${produtoEstoque.id}</td><td>${produtoEstoque.descricao}</td><td>${produtoEstoque.valor}</td><td>${produtoEstoque.quantidade}</td><td>${produtoEstoque.maquina_id}</td></tr>`
+    }
+
+    tableHtml += '</table>'
     // eslint-disable-next-line prefer-const
     let pagehtml = `
     <!DOCTYPE html>
@@ -194,6 +204,48 @@ body {
             max-width: 400px;
             margin: 0 auto;
             }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+              max-width: 100%;
+            }
+          
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+          
+            th {
+              background-color: #f2f2f2;
+            }
+          
+            tr:nth-child(even) {
+              background-color: #f9f9f9;
+            }
+          
+            /* Estilos adicionais para a tabela dentro da div DadosDiv */
+            #DadosDiv table {
+              margin-top: 0; /* Reduzir a margem superior para se adequar ao layout da página */
+              max-width: 100%;
+              overflow-x: auto;
+            }
+            .forms input {
+              box-sizing: border-box;
+              width: 100%;
+              max-width: 400px; /* Defina uma largura máxima para o campo de entrada */
+              padding: 10px;
+              margin-bottom: 16px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              font-size: 16px;
+            }
+            .responsive-table {
+              width: 100%;
+              overflow-x: auto;
+              display: block;
+            }
         @media (max-width: 768px) {
           .nav-bar {
             padding: 10px; /* Aumenta o preenchimento para criar mais espaço em branco */
@@ -222,6 +274,11 @@ body {
             max-width: 100%; /* Ocupa 100% da largura da tela */
             box-sizing: border-box;
           }
+          table {
+            width: 100%;
+            overflow-x: auto;
+          }
+          
         }
 
 
@@ -248,17 +305,45 @@ body {
     <select name="operation" id="operation">
     <option value="alterarEstoque">Alterar estoque</option>
     <option value="alterarValor">Alterar valor</option>
+    <option value="verDados">Ver Dados</option>
     </select>
-    <label for="userId">ID do usuário a receber:</label>
-    <input type="number" id="userId" name="userId" required inputmode="numeric" pattern="[0-9]*" maxlength="4">
 
-    <label for="amount">Quantidade de tijolos:</label>
-    <input type="number" id="amount" name="amount" required required inputmode="numeric" pattern="[0-9]*">
+    <div id="EstoqueDiv">
+    <label for="productIdE">ID do produto:</label>
+    <br>
+    <input type="number" id="productIdE" name="productIdE" required inputmode="numeric" pattern="[0-9]*" maxlength="4">
+    <br>
+    <label for="amountE">Valor a atualizar o estoque:</label>
+    <br>
+    <input type="number" id="amountE" name="amountE" required required inputmode="numeric" pattern="[0-9]*">
+    <br>
+    <label for="passwordE">Confirme sua senha:</label>
+    <br>
+    <input type="password" id="passwordE" name="passwordE" required inputmode="numeric" pattern="[0-9]*" maxlength="4">
+    <br>
+    <button id="btn-atualizar-estoque">Atualizar Estoque</button>
+    </div>
 
-    <label for="password">Confirme sua senha:</label>
-    <input type="password" id="password" name="password" required inputmode="numeric" pattern="[0-9]*" maxlength="4">
+    <div id="ValorDiv">
+    <label for="productIdV">ID do produto:</label>
+    <br>
+    <input type="number" id="productIdV" name="productIdV" required inputmode="numeric" pattern="[0-9]*" maxlength="4">
+    <br>
+    <label for="amountV">Quantidade de tijolos do produto:</label>
+    <br>
+    <input type="number" id="amountV" name="amountV" required required inputmode="numeric" pattern="[0-9]*">
+    <br>
+    <label for="passwordV">Confirme sua senha:</label>
+    <br>
+    <input type="password" id="passwordV" name="passwordV" required inputmode="numeric" pattern="[0-9]*" maxlength="4">
+    <br>
+    <button id="btn-atualizar-valor">Atualizar Valor</button>
+    </div>
+    <div id="DadosDiv" class="responsive-table">
+      ${tableHtml}
+    </div>
 
-    <button id="btn-enviar-pix">Enviar Pix</button>
+
     </div>
   </div>
 
@@ -266,45 +351,131 @@ body {
   
   <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const enviarPixButton = document.getElementById('btn-enviar-pix');
-    const userIDInput = document.getElementById('userId');
-    const amountInput = document.getElementById('amount');
-    const passwordInput = document.getElementById('password');
+    const operationSelect = document.getElementById('operation');
+    const EstoqueDiv = document.getElementById('EstoqueDiv');
+    const ValorDiv = document.getElementById('ValorDiv');
+    const DadosDiv = document.getElementById('DadosDiv');
+
+    function updateDivVisibility() {
+      // Oculta ou exibe a div com base na opção selecionada
+      if (operationSelect.value === 'alterarEstoque') {
+        EstoqueDiv.style.display = 'block';
+        ValorDiv.style.display = 'none';
+        DadosDiv.style.display = 'none';
+      } else if(operationSelect.value === 'alterarValor') {
+        EstoqueDiv.style.display = 'none';
+        ValorDiv.style.display = 'block';
+        DadosDiv.style.display = 'none';
+      }else if(operationSelect.value === 'verDados') {
+        EstoqueDiv.style.display = 'none';
+        ValorDiv.style.display = 'none';
+        DadosDiv.style.display = 'block';
+      }
+    }
+
+    // Verifica se os elementos necessários existem no documento
+    if (operationSelect && EstoqueDiv && ValorDiv) {
+      // Adiciona o ouvinte de evento à seleção de operação
+      operationSelect.addEventListener('change', updateDivVisibility);
+
+      // Chama a função inicialmente para definir a visibilidade correta ao carregar a página
+      updateDivVisibility();
+    }
+
+    const atualizarEstoqueButton = document.getElementById('btn-atualizar-estoque');
+    const productIDEInput = document.getElementById('productIdE');
+    const amountEInput = document.getElementById('amountE');
+    const passwordEInput = document.getElementById('passwordE');
     
-    enviarPixButton.addEventListener('click', async function () {
-      const userID = userIDInput.value;
-      const amount = amountInput.value;
-      const password = passwordInput.value;
+    atualizarEstoqueButton.addEventListener('click', async function () {
+      const productIdE = productIDEInput.value;
+      const amountE = amountEInput.value;
+      const passwordE = passwordEInput.value;
       var numericRegex = /^[0-9]+$/;
-  
-      
-  
-      // Verifica se os campos de senha não estão vazios e se a senha nova e a confirmação coincidem
-      if (userID !== '' && amount !== '' && password !== '' && numericRegex.test(userID) && numericRegex.test(amount) && numericRegex.test(password) && password == ${senha}) {
+
+      if (productIdE !== '' && amountE !== '' && passwordE !== '' && numericRegex.test(productIdE) && numericRegex.test(amountE) && numericRegex.test(passwordE) && passwordE == ${senha}) {
         try {
         const idNumero = ${idNumero};
-        const response = await fetch('/api/v1/enviar-pix', {
+        const response = await fetch('/api/v1/atualizar-estoque', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ userID, amount, idNumero}),
+          body: JSON.stringify({ productIdE, amountE, idNumero}),
         });
 
         const resultado = await response.json();
 
         if (resultado.result == 1) {
           alert(resultado.message)
-          userIDInput.value = '';
+          productIDEInput.value = '';
         } else if(resultado.result == 2){
           alert(resultado.message)
-          amountInput.value = '';
+          productIDEInput.value = '';
         } else if(resultado.result == 3){
           alert(resultado.message)
-          amountInput.value = '';
+          productIDEInput.value = '';
         }else if(resultado.result == 4){
           alert(resultado.message)
-          amountInput.value = '';
+          amountEInput.value = '';
+        } else if(resultado.result == 5){
+          alert(resultado.message)
+          location.reload()
+        }else{
+          console.error('Erro ao atualizar a senha:', result.error);
+        }
+
+        } catch (error) {
+          console.error('Erro ao atualizar a senha:', error);
+        }
+  
+        // Limpa os campos de senha
+        passwordEInput.value = '';
+      } else if(productIdE == '' || amountE == '' || passwordE == ''){
+        alert('Todos os dados devem ser preenchidos');
+      } else if (!numericRegex.test(productIdE) || !numericRegex.test(amountE) || !numericRegex.test(passwordE)) {
+        alert("Por favor, insira apenas números");
+      } else if(passwordE != ${senha}){
+        alert("Senha Incorreta");
+      }
+    });
+
+    const atualizarValorButton = document.getElementById('btn-atualizar-valor');
+    const productIDVInput = document.getElementById('productIdV');
+    const amountVInput = document.getElementById('amountV');
+    const passwordVInput = document.getElementById('passwordV');
+    
+    atualizarValorButton.addEventListener('click', async function () {
+      const productIdV = productIDVInput.value;
+      const amountV = amountVInput.value;
+      const passwordV = passwordVInput.value;
+      var numericRegex = /^[0-9]+$/;
+
+      if (productIdV !== '' && amountV !== '' && passwordV !== '' && numericRegex.test(productIdV) && numericRegex.test(amountV) && numericRegex.test(passwordV) && passwordV == ${senha}) {
+        try {
+        const idNumero = ${idNumero};
+        const response = await fetch('/api/v1/atualizar-valor', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productIdV, amountV, idNumero}),
+        });
+
+        const resultado = await response.json();
+
+        if (resultado.result == 1) {
+          alert(resultado.message)
+          productIDVInput.value = '';
+        } else if(resultado.result == 2){
+          alert(resultado.message)
+          productIDVInput.value = '';
+        } else if(resultado.result == 3){
+          alert(resultado.message)
+          productIDVInput.value = '';
+        }else if(resultado.result == 4){
+          alert(resultado.message)
+          amountVInput.value = '';
         } else if(resultado.result == 5){
           alert(resultado.message)
           location.reload()
@@ -318,14 +489,16 @@ body {
   
         // Limpa os campos de senha
         passwordInput.value = '';
-      } else if(userID == '' || amount == '' || password == ''){
+      } else if(productIdV == '' || amountV == '' || passwordV == ''){
         alert('Todos os dados devem ser preenchidos');
-      } else if (!numericRegex.test(userID) || !numericRegex.test(amount) || !numericRegex.test(password)) {
+      } else if (!numericRegex.test(productIdV) || !numericRegex.test(amountV) || !numericRegex.test(passwordV)) {
         alert("Por favor, insira apenas números");
-      } else if(password != ${senha}){
+      } else if(passwordV != ${senha}){
         alert("Senha Incorreta");
       }
     });
+
+
 
   });
   </script>
@@ -340,40 +513,69 @@ body {
   }
 })
 
-router.post('/enviar-pix', async (req, res) => {
+router.post('/atualizar-estoque', async (req, res) => {
   try {
-    const { userID, amount, idNumero } = req.body
+    const { productIdE, amountE, idNumero } = req.body
 
     // eslint-disable-next-line prefer-const
-    let usuario = await db.query('SELECT * from jogadores where id = $1', [userID])
-    if (usuario.rowCount === 0) {
-      res.json({ result: 1, message: 'Usuário não encontrado' })
-      return
-    }
-    const receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [idNumero])
-    const totalReceitas = parseInt(receitas.rows[0].coalesce)
-
-    const despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [idNumero])
-    const totalDespesas = parseInt(despesas.rows[0].coalesce)
-
-    if ((totalReceitas - totalDespesas) < amount) {
-      res.json({ result: 2, message: 'Saldo Insuficiente' })
+    let produto = await db.query('SELECT * from produtos where id = $1', [productIdE])
+    if (produto.rowCount === 0) {
+      res.json({ result: 1, message: 'Produto não encontrado' })
       return
     }
 
     // eslint-disable-next-line eqeqeq
-    if (userID == idNumero) {
-      res.json({ result: 3, message: 'Não é possivel enviar um pix para você mesmo!' })
+    if (productIdE == 5) {
+      res.json({ result: 2, message: 'Não é possivel alterar o estoque do pix' })
       return
     }
-    if (amount < 1) {
-      res.json({ result: 4, message: 'Você não pode enviar um valor abaixo de 1 tijolinho' })
-    }
-    await db.query('INSERT INTO receitas (jogador_id, jogo_id, valor, data) VALUES ($1, 13, $2, NOW())', [userID, amount])
-    await db.query('INSERT INTO despesas (jogador_id, produto_id, valor, data) VALUES ($1, 5, $2, NOW())', [idNumero, amount])
 
-    console.log('Pix Enviado')
-    res.json({ result: 5, message: 'Pix enviado com sucesso!' })
+    // eslint-disable-next-line eqeqeq
+    if (idNumero !== 2 && idNumero !== 1 && idNumero !== 17) {
+      res.json({ result: 3, message: 'Você não é um administrador!' })
+      return
+    }
+    if (amountE < 0) {
+      res.json({ result: 4, message: 'Você não pode deixar o valor do estoque negativo!' })
+      return
+    }
+    await db.query('UPDATE estoque SET quantidade = $1 WHERE id = $2', [amountE, productIdE])
+
+    res.json({ result: 5, message: 'Estoque Atualizado com sucesso' })
+  } catch (error) {
+    console.error('Erro ao atualizar a senha:', error)
+    res.status(500).send('Erro ao atualizar a senha')
+  }
+})
+
+router.post('/atualizar-valor', async (req, res) => {
+  try {
+    const { productIdV, amountV, idNumero } = req.body
+
+    // eslint-disable-next-line prefer-const
+    let produto = await db.query('SELECT * from produtos where id = $1', [productIdV])
+    if (produto.rowCount === 0) {
+      res.json({ result: 1, message: 'Produto não encontrado' })
+      return
+    }
+
+    if (productIdV === 5) {
+      res.json({ result: 2, message: 'Não é possivel alterar o valor do pix' })
+      return
+    }
+
+    // eslint-disable-next-line eqeqeq
+    if (idNumero !== 2 && idNumero !== 1 && idNumero !== 17) {
+      res.json({ result: 3, message: 'Você não é um administrador!' })
+      return
+    }
+    if (amountV < 0) {
+      res.json({ result: 4, message: 'Você não pode deixar o valor do produto negativo!' })
+      return
+    }
+    await db.query('UPDATE produtos SET valor = $1 WHERE id = $2', [amountV, productIdV])
+
+    res.json({ result: 5, message: 'Valor Atualizado com sucesso' })
   } catch (error) {
     console.error('Erro ao atualizar a senha:', error)
     res.status(500).send('Erro ao atualizar a senha')
