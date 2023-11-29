@@ -331,6 +331,7 @@ router.post('/enviar-pix', async (req, res) => {
     }
     if (amount < 1) {
       res.json({ result: 4, message: 'Você não pode enviar um valor abaixo de 1 tijolinho' })
+      return
     }
     await db.query('INSERT INTO receitas (jogador_id, jogo_id, valor, data) VALUES ($1, 13, $2, NOW())', [userID, amount])
     await db.query('INSERT INTO despesas (jogador_id, produto_id, valor, data) VALUES ($1, 5, $2, NOW())', [idNumero, amount])
