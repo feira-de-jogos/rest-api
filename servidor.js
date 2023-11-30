@@ -17,6 +17,7 @@ app.use(cors({
   origin: [
     /feira-de-jogos\.sj\.ifsc\.edu\.br$/,
     /gitpod\.io$/,
+    /github\.dev$/,
     /ifsc\.digital$/
   ],
   methods: 'POST'
