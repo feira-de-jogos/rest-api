@@ -14,23 +14,29 @@ router.use(session({
 }))
 
 router.get('/conta', async (req, res) => {
+  let ticket
   try {
     if (req.session.token == null || req.session.token === '') {
       console.log('Usuário não autenticado. Redirecionando para login')
       res.redirect('/')
       return
     }
-    const ticket = await client.verifyIdToken({
+    ticket = await client.verifyIdToken({
       audience,
       idToken: req.session.token
     })
-    const payload = ticket.getPayload()
-    // eslint-disable-next-line prefer-const
-    let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
-    if (id.rowCount === 0) {
-      res.redirect('/')
-      return
-    }
+  } catch (err) {
+    res.redirect('/')
+  }
+
+  const payload = ticket.getPayload()
+  const id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
+  if (id.rowCount === 0) {
+    res.redirect('/')
+    return
+  }
+
+  try {
     const idNumero = id.rows[0].id
     const senha = id.rows[0].senha
     const receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [id.rows[0].id])
@@ -39,8 +45,7 @@ router.get('/conta', async (req, res) => {
     const despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [id.rows[0].id])
     const totalDespesas = parseInt(despesas.rows[0].coalesce)
 
-    // eslint-disable-next-line prefer-const
-    let pagehtml = `
+    const pagehtml = `
     <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -384,22 +389,15 @@ h1 {
 router.post('/mudar-senha', async (req, res) => {
   try {
     const { idNumero, novaSenha } = req.body
-
     await db.query('UPDATE jogadores SET senha = $1 WHERE id = $2', [novaSenha, idNumero])
-
-    console.log('Senha atualizada com sucesso!')
     res.json({ success: true, message: 'Senha atualizada com sucesso!' })
   } catch (error) {
-    console.error('Erro ao atualizar a senha:', error)
     res.status(500).send('Erro ao atualizar a senha')
   }
 })
 
 router.post('/logout', (req, res) => {
-  // Limpar a sessão
   req.session.token = null
-
-  // Enviar uma resposta JSON indicando sucesso
   res.json({ success: true })
 })
 

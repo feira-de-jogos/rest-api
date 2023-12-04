@@ -14,6 +14,7 @@ router.use(session({
 }))
 
 router.get('/adm', async (req, res) => {
+  let payload
   try {
     if (req.session.token == null || req.session.token === '') {
       console.log('Usuário não autenticado. Redirecionando para login')
@@ -24,9 +25,13 @@ router.get('/adm', async (req, res) => {
       audience,
       idToken: req.session.token
     })
-    const payload = ticket.getPayload()
-    // eslint-disable-next-line prefer-const
-    let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
+    payload = ticket.getPayload()
+  } catch (err) {
+    res.redirect('/')
+  }
+
+  try {
+    const id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {
       res.redirect('/')
       return
@@ -34,7 +39,6 @@ router.get('/adm', async (req, res) => {
     const idNumero = id.rows[0].id
     const senha = id.rows[0].senha
 
-    // eslint-disable-next-line eqeqeq
     if (idNumero !== 2 && idNumero !== 1 && idNumero !== 17) {
       res.redirect('/api/v1/extrato')
       return
@@ -56,8 +60,7 @@ router.get('/adm', async (req, res) => {
     }
 
     tableHtml += '</table>'
-    // eslint-disable-next-line prefer-const
-    let pagehtml = `
+    const pagehtml = `
     <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -517,20 +520,17 @@ router.post('/atualizar-estoque', async (req, res) => {
   try {
     const { productIdE, amountE, idNumero } = req.body
 
-    // eslint-disable-next-line prefer-const
-    let produto = await db.query('SELECT * from produtos where id = $1', [productIdE])
+    const produto = await db.query('SELECT * from produtos where id = $1', [productIdE])
     if (produto.rowCount === 0) {
       res.json({ result: 1, message: 'Produto não encontrado' })
       return
     }
 
-    // eslint-disable-next-line eqeqeq
-    if (productIdE == 5) {
+    if (productIdE === 5) {
       res.json({ result: 2, message: 'Não é possivel alterar o estoque do pix' })
       return
     }
 
-    // eslint-disable-next-line eqeqeq
     if (idNumero !== 2 && idNumero !== 1 && idNumero !== 17) {
       res.json({ result: 3, message: 'Você não é um administrador!' })
       return
@@ -543,8 +543,7 @@ router.post('/atualizar-estoque', async (req, res) => {
 
     res.json({ result: 5, message: 'Estoque Atualizado com sucesso' })
   } catch (error) {
-    console.error('Erro ao atualizar a senha:', error)
-    res.status(500).send('Erro ao atualizar a senha')
+    res.sendStatus(500)
   }
 })
 
@@ -552,8 +551,7 @@ router.post('/atualizar-valor', async (req, res) => {
   try {
     const { productIdV, amountV, idNumero } = req.body
 
-    // eslint-disable-next-line prefer-const
-    let produto = await db.query('SELECT * from produtos where id = $1', [productIdV])
+    const produto = await db.query('SELECT * from produtos where id = $1', [productIdV])
     if (produto.rowCount === 0) {
       res.json({ result: 1, message: 'Produto não encontrado' })
       return
@@ -564,7 +562,6 @@ router.post('/atualizar-valor', async (req, res) => {
       return
     }
 
-    // eslint-disable-next-line eqeqeq
     if (idNumero !== 2 && idNumero !== 1 && idNumero !== 17) {
       res.json({ result: 3, message: 'Você não é um administrador!' })
       return
@@ -577,8 +574,7 @@ router.post('/atualizar-valor', async (req, res) => {
 
     res.json({ result: 5, message: 'Valor Atualizado com sucesso' })
   } catch (error) {
-    console.error('Erro ao atualizar a senha:', error)
-    res.status(500).send('Erro ao atualizar a senha')
+    res.sendStatus(500)
   }
 })
 

@@ -14,6 +14,7 @@ router.use(session({
 }))
 
 router.get('/extrato', async (req, res) => {
+  let payload
   try {
     if (req.session.token == null || req.session.token === '') {
       console.log('Usuário não autenticado. Redirecionando para login')
@@ -24,10 +25,13 @@ router.get('/extrato', async (req, res) => {
       audience,
       idToken: req.session.token
     })
-    const payload = ticket.getPayload()
+    payload = ticket.getPayload()
+  } catch (err) {
+    res.redirect('/')
+  }
 
-    // eslint-disable-next-line prefer-const
-    let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
+  try {
+    const id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {
       res.redirect('/')
       return

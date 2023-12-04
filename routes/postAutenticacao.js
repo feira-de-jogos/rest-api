@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const session = require('express-session')
 const router = express.Router()
@@ -9,20 +10,25 @@ const db = require('../db.js')
 const audience = process.env.GOOGLE_CLIENT_ID
 
 router.use(session({
-  secret: 'O1iP4BTe4ApgxLhAbeZPGnbjZOzH2fmg', // Troque isso por uma chave secreta forte
+  secret: process.env.COOKIE_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // Configurações do cookie (pode precisar ser ajustado para produção)
+  cookie: { secure: true }
 }))
 
 router.post('/autenticacao', async (req, res) => {
+  let payload
   try {
     const ticket = await client.verifyIdToken({
       audience,
       idToken: req.body.credential
     })
-    const payload = ticket.getPayload()
+    payload = ticket.getPayload()
+  } catch (err) {
+    res.redirect('/')
+  }
 
+  try {
     let senha
     let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {

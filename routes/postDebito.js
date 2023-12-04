@@ -28,9 +28,11 @@ router.post('/debito', async (req, res) => {
 
     let receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [req.body.id])
     receitas = parseInt(receitas.rows[0].sum)
+    if (isNaN(receitas)) { receitas = 0 }
 
     let despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [req.body.id])
     despesas = parseInt(despesas.rows[0].sum)
+    if (isNaN(despesas)) { despesas = 0 }
 
     const produto = await db.query('SELECT id, valor FROM produtos WHERE id = $1 AND EXISTS (SELECT 1 FROM estoque WHERE maquina_id = $2 AND produto_id = produtos.id AND quantidade > 0);', [req.body.produto, req.body.maquina])
     if (produto.rowCount === 0) {
@@ -40,7 +42,7 @@ router.post('/debito', async (req, res) => {
     const valor = produto.rows[0].valor
 
     if ((receitas - despesas) < valor) {
-      res.sendStatus(403)
+      res.sendStatus(402)
       return
     }
 

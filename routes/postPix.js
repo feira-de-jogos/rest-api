@@ -14,6 +14,7 @@ router.use(session({
 }))
 
 router.get('/pix', async (req, res) => {
+  let payload
   try {
     if (req.session.token == null || req.session.token === '') {
       console.log('Usuário não autenticado. Redirecionando para login')
@@ -24,9 +25,13 @@ router.get('/pix', async (req, res) => {
       audience,
       idToken: req.session.token
     })
-    const payload = ticket.getPayload()
-    // eslint-disable-next-line prefer-const
-    let id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
+    payload = ticket.getPayload()
+  } catch (err) {
+    res.redirect('/')
+  }
+
+  try {
+    const id = await db.query('SELECT * FROM jogadores WHERE email = $1', [payload.email])
     if (id.rowCount === 0) {
       res.redirect('/')
       return
@@ -307,8 +312,7 @@ router.post('/enviar-pix', async (req, res) => {
   try {
     const { userID, amount, idNumero } = req.body
 
-    // eslint-disable-next-line prefer-const
-    let usuario = await db.query('SELECT * from jogadores where id = $1', [userID])
+    const usuario = await db.query('SELECT * from jogadores where id = $1', [userID])
     if (usuario.rowCount === 0) {
       res.json({ result: 1, message: 'Usuário não encontrado' })
       return
@@ -324,8 +328,7 @@ router.post('/enviar-pix', async (req, res) => {
       return
     }
 
-    // eslint-disable-next-line eqeqeq
-    if (userID == idNumero) {
+    if (userID === idNumero) {
       res.json({ result: 3, message: 'Não é possivel enviar um pix para você mesmo!' })
       return
     }
@@ -336,11 +339,9 @@ router.post('/enviar-pix', async (req, res) => {
     await db.query('INSERT INTO receitas (jogador_id, jogo_id, valor, data) VALUES ($1, 13, $2, NOW())', [userID, amount])
     await db.query('INSERT INTO despesas (jogador_id, produto_id, valor, data) VALUES ($1, 5, $2, NOW())', [idNumero, amount])
 
-    console.log('Pix Enviado')
     res.json({ result: 5, message: 'Pix enviado com sucesso!' })
   } catch (error) {
-    console.error('Erro ao atualizar a senha:', error)
-    res.status(500).send('Erro ao atualizar a senha')
+    res.sendStatus(500)
   }
 })
 
