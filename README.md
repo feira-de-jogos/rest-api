@@ -1,1 +1,1 @@
-Código da REST API. A documentação completa está reunida no repositório `docs`.
+Código da REST API. A documentação completa está em https://github.com/feira-de-jogos/.github.
