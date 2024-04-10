@@ -26,11 +26,11 @@ router.post('/debito', async (req, res) => {
       return
     }
 
-    let receitas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM receitas WHERE jogador_id = $1', [req.body.id])
+    let receitas = await db.query('SELECT COALESCE(SUM(valor), 0) as sum FROM receitas WHERE jogador_id = $1', [req.body.id])
     receitas = parseInt(receitas.rows[0].sum)
     if (isNaN(receitas)) { receitas = 0 }
 
-    let despesas = await db.query('SELECT COALESCE(SUM(valor), 0) FROM despesas WHERE jogador_id = $1', [req.body.id])
+    let despesas = await db.query('SELECT COALESCE(SUM(valor), 0) as sum FROM despesas WHERE jogador_id = $1', [req.body.id])
     despesas = parseInt(despesas.rows[0].sum)
     if (isNaN(despesas)) { despesas = 0 }
 
