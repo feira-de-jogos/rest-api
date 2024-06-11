@@ -4,11 +4,11 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Backend",
+      "name": "REST API",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/servidor.js"
+      "program": "${workspaceFolder}/servidor.mjs"
     }
   ]
 }
