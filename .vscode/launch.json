@@ -8,7 +8,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/servidor.mjs"
+      "program": "${workspaceFolder}/servidor.js"
     }
   ]
 }
