@@ -13,10 +13,8 @@ app.use(cors({
 }))
 app.use(express.urlencoded({ extended: true }))
 
-const getIndex = require('./routes/getIndex')
 const postLogin = require('./routes/postLogin')
 
-app.use('/', getIndex)
 app.use('/api/v2', postLogin)
 
 app.listen(port, () => { console.log('Server running!') })
