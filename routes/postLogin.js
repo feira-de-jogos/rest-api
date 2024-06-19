@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client();
-const audience = "331191695151-ku8mdhd76pc2k36itas8lm722krn0u64.apps.googleusercontent.com";
+const audience = process.env.GOOGLE_CLIENT_ID;
 const { Pool } = require('pg');
 const pool = new Pool();
 
