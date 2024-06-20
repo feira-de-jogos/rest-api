@@ -24,12 +24,12 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/v2', postLogin)
 
 io.of('/vending-machine').on('connection', (socket) => {
-    socket.on('disconnect', () => { })
+  socket.on('disconnect', () => { })
 })
 
 io.of('/arcade').on('connection', (socket) => {
   console.log("Socket: " + socket.id)
-  
+
   socket.on('state', (state) => {
     console.log("Socket " + socket.id + ": " + state)
   })
