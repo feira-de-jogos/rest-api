@@ -6,4 +6,4 @@ COPY servidor.js .
 COPY routes/ routes/
 RUN npm install --prefix /app
 
-CMD [ "npm", "start" ]
+CMD [ "node", "servidor.js" ]
