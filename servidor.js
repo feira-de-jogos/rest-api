@@ -1,13 +1,13 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const { createServer } = require("http")
-const { Server } = require("socket.io")
+const { createServer } = require('http')
+const { Server } = require('socket.io')
 const port = process.env.PORT || 3000
 
 const app = express()
 const httpServer = createServer(app)
-const io = new Server(httpServer, { path: "/api/v2/machine/" })
+const io = new Server(httpServer, { path: '/api/v2/machine/' })
 
 const postLogin = require('./routes/postLogin')
 
@@ -28,10 +28,10 @@ io.of('/vending-machine').on('connection', (socket) => {
 })
 
 io.of('/arcade').on('connection', (socket) => {
-  console.log("Socket: " + socket.id)
+  console.log('Socket: ' + socket.id)
 
   socket.on('state', (state) => {
-    console.log("Socket " + socket.id + ": " + state)
+    console.log('Socket ' + socket.id + ': ' + state)
   })
 
   socket.on('disconnect', () => { })
