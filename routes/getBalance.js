@@ -6,7 +6,7 @@ const audience = process.env.GOOGLE_CLIENT_ID
 const { Pool } = require('pg')
 const pool = new Pool()
 
-router.post('/login', async (req, res) => {
+router.get('/balance', async (req, res) => {
   let payload
   try {
     const ticket = await client.verifyIdToken({
@@ -16,23 +16,27 @@ router.post('/login', async (req, res) => {
     payload = ticket.getPayload()
 
     const email = payload.email
-    const name = payload.name
   } catch (err) {
     console.error(err)
     res.sendStatus(401)
   }
 
   try {
-    const auth = await pool.query("SELECT id FROM people WHERE email = $1", [email])
+    const auth = await pool.query("SELECT id FROM people WHERE email = $1 ", [email])
     if (auth.rowCount === 0) {
-      const insertResult = await pool.query('INSERT INTO "people"("name", "email") VALUES ($1, $2) RETURNING "id"', [name, email])
-      const userId = insertResult.rows[0].id
-
-      return res.status(201).send({ user: userId })
+      res.sendStatus(401)
     }
-    
     const userId = auth.rows[0].id
-    return res.status(200).send({ user: userId })
+    
+    let expenses = await pool.query("SELECT COALESCE(SUM(value), 0) AS sum FROM operations WHERE \"from\" = $1 and completed = 't'", [userId])
+    expenses = parseInt(expenses.rows[0].sum)
+
+    let revenues = await pool.query("SELECT COALESCE(SUM(value), 0) AS sum FROM operations WHERE \"to\" = $1 and completed = 't'", [userId])
+    revenues = parseInt(revenues.rows[0].sum)
+
+    let BalanceValue = revenues - expenses;
+
+    return res.status(200).send({ balance: BalanceValue })
   } catch (err) {
     console.error(err)
     res.sendStatus(500)

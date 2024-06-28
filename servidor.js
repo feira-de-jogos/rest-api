@@ -10,18 +10,18 @@ const httpServer = createServer(app)
 const io = new Server(httpServer, { path: '/api/v2/machine/' })
 
 const postLogin = require('./routes/postLogin')
+const getBalance = require('./routes/getBalance')
+const getGames = require('./routes/getGames')
 
 app.use(cors({
-  origin: [
-    /postman\.co$/,
-    /github\.dev$/,
-    /feira-de-jogos\.dev\.br$/
-  ],
+  origin: [/feira-de-jogos\.dev\.br$/],
   methods: 'POST'
 }))
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 app.use('/api/v2', postLogin)
+app.use('/api/v2', getBalance)
+app.use('/api/v2', getGames)
 
 io.of('/vending-machine').on('connection', (socket) => {
   socket.on('disconnect', () => { })

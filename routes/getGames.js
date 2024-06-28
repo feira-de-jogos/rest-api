@@ -6,7 +6,7 @@ const audience = process.env.GOOGLE_CLIENT_ID
 const { Pool } = require('pg')
 const pool = new Pool()
 
-router.post('/login', async (req, res) => {
+router.get('/games', async (req, res) => {
   let payload
   try {
     const ticket = await client.verifyIdToken({
@@ -16,7 +16,6 @@ router.post('/login', async (req, res) => {
     payload = ticket.getPayload()
 
     const email = payload.email
-    const name = payload.name
   } catch (err) {
     console.error(err)
     res.sendStatus(401)
@@ -25,14 +24,19 @@ router.post('/login', async (req, res) => {
   try {
     const auth = await pool.query("SELECT id FROM people WHERE email = $1", [email])
     if (auth.rowCount === 0) {
-      const insertResult = await pool.query('INSERT INTO "people"("name", "email") VALUES ($1, $2) RETURNING "id"', [name, email])
-      const userId = insertResult.rows[0].id
-
-      return res.status(201).send({ user: userId })
+      res.sendStatus(401)
     }
-    
-    const userId = auth.rows[0].id
-    return res.status(200).send({ user: userId })
+
+    let gamesSearch = await pool.query('SELECT * FROM "products" WHERE "type" = 1')
+    const games = gamesSearch.rows.map(game => ({
+      product: game.id,
+      name: game.name,
+      description: game.description,
+      image: game.image,
+      url: game.url
+    }));
+
+    return res.status(200).json(games);
   } catch (err) {
     console.error(err)
     res.sendStatus(500)
