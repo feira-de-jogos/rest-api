@@ -19,7 +19,7 @@ router.post('/login', async (req, res) => {
     const name = payload.name
   } catch (err) {
     console.error(err)
-    res.sendStatus(401)
+    return res.sendStatus(401)
   }
 
   try {
@@ -35,7 +35,7 @@ router.post('/login', async (req, res) => {
     return res.status(200).send({ user: userId })
   } catch (err) {
     console.error(err)
-    res.sendStatus(500)
+    return res.sendStatus(500)
   }
 })
 

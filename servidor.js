@@ -12,6 +12,7 @@ const io = new Server(httpServer, { path: '/api/v2/machine/' })
 const postLogin = require('./routes/postLogin')
 const getBalance = require('./routes/getBalance')
 const getGames = require('./routes/getGames')
+const getStatement = require('./routes/getStatement')
 
 app.use(cors({
   origin: [/feira-de-jogos\.dev\.br$/],
@@ -22,6 +23,7 @@ app.use(express.json())
 app.use('/api/v2', postLogin)
 app.use('/api/v2', getBalance)
 app.use('/api/v2', getGames)
+app.use('/api/v2', getStatement)
 
 io.of('/vending-machine').on('connection', (socket) => {
   socket.on('disconnect', () => { })

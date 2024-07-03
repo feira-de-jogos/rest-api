@@ -18,13 +18,13 @@ router.get('/games', async (req, res) => {
     const email = payload.email
   } catch (err) {
     console.error(err)
-    res.sendStatus(401)
+    return res.sendStatus(401)
   }
 
   try {
     const auth = await pool.query("SELECT id FROM people WHERE email = $1", [email])
     if (auth.rowCount === 0) {
-      res.sendStatus(401)
+      return res.sendStatus(401)
     }
 
     let gamesSearch = await pool.query('SELECT * FROM "products" WHERE "type" = 1')
@@ -39,7 +39,7 @@ router.get('/games', async (req, res) => {
     return res.status(200).json(games);
   } catch (err) {
     console.error(err)
-    res.sendStatus(500)
+    return res.sendStatus(500)
   }
 })
 

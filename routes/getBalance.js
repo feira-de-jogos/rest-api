@@ -18,16 +18,16 @@ router.get('/balance', async (req, res) => {
     const email = payload.email
   } catch (err) {
     console.error(err)
-    res.sendStatus(401)
+    return res.sendStatus(401)
   }
 
   try {
     const auth = await pool.query("SELECT id FROM people WHERE email = $1 ", [email])
     if (auth.rowCount === 0) {
-      res.sendStatus(401)
+      return res.sendStatus(401)
     }
     const userId = auth.rows[0].id
-    
+
     let expenses = await pool.query("SELECT COALESCE(SUM(value), 0) AS sum FROM operations WHERE \"from\" = $1 and completed = 't'", [userId])
     expenses = parseInt(expenses.rows[0].sum)
 
@@ -39,7 +39,7 @@ router.get('/balance', async (req, res) => {
     return res.status(200).send({ balance: BalanceValue })
   } catch (err) {
     console.error(err)
-    res.sendStatus(500)
+    return res.sendStatus(500)
   }
 })
 
