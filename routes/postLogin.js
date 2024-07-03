@@ -15,8 +15,8 @@ router.post('/login', async (req, res) => {
     })
     payload = ticket.getPayload()
 
-    const email = payload.email
-    const name = payload.name
+    var email = payload.email
+    var name = payload.name
   } catch (err) {
     console.error(err)
     return res.sendStatus(401)

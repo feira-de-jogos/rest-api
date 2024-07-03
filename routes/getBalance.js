@@ -15,7 +15,7 @@ router.get('/balance', async (req, res) => {
     })
     payload = ticket.getPayload()
 
-    const email = payload.email
+    var email = payload.email
   } catch (err) {
     console.error(err)
     return res.sendStatus(401)

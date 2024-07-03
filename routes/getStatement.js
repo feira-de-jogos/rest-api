@@ -14,7 +14,7 @@ router.get('/statement', async (req, res) => {
       idToken: req.headers.authorization.split(" ")[1]
     })
     payload = ticket.getPayload()
-    const email = payload.email
+    var email = payload.email
   } catch (err) {
     console.error(err)
     return res.sendStatus(401)
