@@ -22,7 +22,7 @@ router.get('/games', async (req, res) => {
   }
 
   try {
-    const auth = await pool.query("SELECT id FROM people WHERE email = $1", [email])
+    const auth = await pool.query('SELECT "id" FROM "people" WHERE "email" = $1', [email])
     if (auth.rowCount === 0) {
       return res.sendStatus(401)
     }
