@@ -31,6 +31,10 @@ app.use('/api/v2', getGames)
 app.use('/api/v2', getStatement)
 app.use('/api/v2', getProducts)
 
+io.of('/').use(async (socket, next) => {
+  socket.disconnect()
+})
+
 io.of('/vending-machine').use(async (socket, next) => {
   try {
     const token = socket.handshake.auth.token
