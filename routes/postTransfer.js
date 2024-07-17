@@ -7,12 +7,10 @@ const audience = process.env.GOOGLE_CLIENT_ID
 const { Pool } = require('pg')
 const pool = new Pool()
 
-
 const transferSchema = Joi.object({
   to: Joi.number().integer().required(),
   value: Joi.number().integer().required(),
 });
-
 
 router.post('/transfer', async (req, res) => {
   let payload
@@ -30,7 +28,6 @@ router.post('/transfer', async (req, res) => {
   }
 
   try {
-
     const { error } = transferSchema.validate(req.body);
     if (error) {
       return res.status(400).send({ error: error.details[0].message });
@@ -43,10 +40,10 @@ router.post('/transfer', async (req, res) => {
     const userId = auth.rows[0].id
     const { to, value } = req.body;
 
-    let expenses = await pool.query("SELECT COALESCE(SUM(value), 0) AS sum FROM operations WHERE \"from\" = $1 and completed = 't'", [userId])
+    let expenses = await pool.query('SELECT COALESCE(SUM("value"), 0) AS sum FROM "operations" WHERE "from" = $1 and "completed" = true', [userId])
     expenses = parseInt(expenses.rows[0].sum)
 
-    let revenues = await pool.query("SELECT COALESCE(SUM(value), 0) AS sum FROM operations WHERE \"to\" = $1 and completed = 't'", [userId])
+    let revenues = await pool.query('SELECT COALESCE(SUM("value"), 0) AS sum FROM "operations" WHERE "to" = $1 and "completed" = true', [userId])
     revenues = parseInt(revenues.rows[0].sum)
 
     let BalanceValue = revenues - expenses;
@@ -55,7 +52,7 @@ router.post('/transfer', async (req, res) => {
       return res.sendStatus(402)
     }
 
-    const destiny = await pool.query("SELECT email FROM people WHERE id = $1", [to])
+    const destiny = await pool.query('SELECT "email" FROM "people" WHERE id = $1', [to])
     if (destiny.rowCount === 0) {
       return res.sendStatus(403)
     }
@@ -70,7 +67,6 @@ router.post('/transfer', async (req, res) => {
       const retryAfter = Math.ceil(300 - secondsElapsed);
       return res.set('Retry-After', retryAfter.toString()).sendStatus(429);
     }
-
 
     const insertResult = await pool.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "completed") VALUES($1, $2, 7, $3, NOW(), true) RETURNING "id"', [userId, to, value])
     const operationId = insertResult.rows[0].id

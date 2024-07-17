@@ -27,16 +27,15 @@ router.get('/statement', async (req, res) => {
     }
     const userId = auth.rows[0].id
 
-    let statementSearch = await pool.query('SELECT "operations"."id" AS "id", "origem_person"."name" AS "origem", "destino_person"."name" AS "destino", "products"."name" AS "produto", "operations"."value" AS "valor", TO_CHAR("operations"."date", \'DD/MM/YYYY HH24:MI:SS\') AS data, "operations"."mfa" AS mfa, "operations"."completed" AS concluida FROM "operations" LEFT JOIN "people" AS origem_person ON "operations"."from" = "origem_person"."id" LEFT JOIN "people" AS "destino_person" ON "operations"."to" = "destino_person"."id" LEFT JOIN "products" ON "operations"."product" = "products"."id" WHERE "operations"."to" = $1 OR "operations"."from" = $1 ORDER BY "operations"."date" DESC;', [userId])
+    let statementSearch = await pool.query('SELECT "operations"."id" AS "operation", "from_person"."name" AS "from", "to_person"."name" AS "to", "products"."name" AS "product", "operations"."value" AS "value", TO_CHAR("operations"."date", \'DD/MM/YYYY HH24:MI:SS\') AS timestamp, "operations"."mfa" AS mfa, "operations"."completed" AS completed FROM "operations" LEFT JOIN "people" AS from_person ON "operations"."from" = "from_person"."id" LEFT JOIN "people" AS "to_person" ON "operations"."to" = "to_person"."id" LEFT JOIN "products" ON "operations"."product" = "products"."id" WHERE "operations"."to" = $1 OR "operations"."from" = $1 ORDER BY "operations"."date" DESC;', [userId])
     const statement = statementSearch.rows.map(statement => ({
-      id: statement.id,
-      origem: statement.origem,
-      destino: statement.destino,
-      produto: statement.produto,
-      valor: statement.valor,
-      data: statement.data,
-      twofa: statement.mfa,
-      concluida: statement.concluida
+      operation: statement.operation,
+      from: statement.from,
+      to: statement.to,
+      product: statement.product,
+      value: statement.value,
+      timestamp: statement.timestamp,
+      completed: statement.completed
     }));
 
     return res.status(200).json(statement)

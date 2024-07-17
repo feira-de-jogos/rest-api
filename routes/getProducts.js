@@ -33,7 +33,8 @@ router.get('/products', async (req, res) => {
       name: product.name,
       description: product.description,
       image: product.image,
-      price: product.price
+      price: product.price,
+      stock: product.stock
     }));
 
     return res.status(200).json(products);
