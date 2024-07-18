@@ -5,8 +5,12 @@ const { createServer } = require('http')
 const { Server } = require('socket.io')
 const app = express()
 const httpServer = createServer(app)
-const io = new Server(httpServer, { path: '/api/v2/machine/' })
+const io = new Server(httpServer, {
+  path: '/api/v2/machine/',
+  cors: { origin: '*' }
+})
 const port = process.env.PORT || 3000
+const authBearerParser = require('auth-bearer-parser').default
 const jwt = require('jsonwebtoken')
 const secretKeyVendingMachine = process.env.TOKEN_SECRET_KEY_VENDING_MACHINE
 const secretKeyArcade = process.env.TOKEN_SECRET_KEY_ARCADE
@@ -19,10 +23,11 @@ const getStatement = require('./routes/getStatement')
 const getProducts = require('./routes/getProducts')
 
 app.use(cors({
-  origin: [/feira-de-jogos\.dev\.br$/],
+  origin: ['https://feira-de-jogos.dev.br'],
   methods: 'POST'
 }))
 app.use(express.json())
+app.use(authBearerParser())
 
 app.use('/api/v2', postLogin)
 app.use('/api/v2', postTransfer)

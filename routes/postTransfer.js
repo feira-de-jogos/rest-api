@@ -17,7 +17,7 @@ router.post('/transfer', async (req, res) => {
   try {
     const ticket = await client.verifyIdToken({
       audience,
-      idToken: req.headers.authorization.split(" ")[1]
+      idToken: req.token
     })
     payload = ticket.getPayload()
 
