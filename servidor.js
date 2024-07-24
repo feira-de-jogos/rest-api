@@ -37,7 +37,28 @@ app.use('/api/v2', getStatement)
 app.use('/api/v2', getProducts)
 
 io.of('/').use(async (socket, next) => {
-  socket.disconnect()
+  console.log('Namespace padrão', socket.id)
+  // socket.disconnect()
+})
+
+io.of('/api/v2/machine').use(async (socket, next) => {
+  console.log('Unity', socket.id, socket.handshake.auth)
+
+  try {
+    const token = socket.handshake.auth.token
+    const jwtDecoded = jwt.verify(token, secretKeyVendingMachine)
+    console.log(jwtDecoded)
+    next()
+  } catch (error) {
+    console.error('Authentication error', error)
+    next(new Error('Authentication error'))
+  }
+
+  socket.on('disconnect', () => { })
+})
+
+io.of('/api/v2/machine').on('connection', (socket) => {
+  socket.emit('state', 'ready')
 })
 
 io.of('/vending-machine').use(async (socket, next) => {
@@ -54,6 +75,7 @@ io.of('/vending-machine').use(async (socket, next) => {
 io.of('/vending-machine').on('connection', (socket) => {
   socket.on('state', (state) => {
     console.log('Socket ' + socket.id + ': ' + state)
+    socket.emit('onState', '200 Ok')
   })
 
   socket.on('disconnect', () => { })
