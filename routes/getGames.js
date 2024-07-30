@@ -3,8 +3,7 @@ const router = express.Router()
 const { OAuth2Client } = require('google-auth-library')
 const client = new OAuth2Client()
 const audience = process.env.GOOGLE_CLIENT_ID
-const { Pool } = require('pg')
-const pool = new Pool()
+const db = require('../db.js')
 
 router.get('/games', async (req, res) => {
   let payload
@@ -22,12 +21,12 @@ router.get('/games', async (req, res) => {
   }
 
   try {
-    const auth = await pool.query('SELECT "id" FROM "people" WHERE "email" = $1', [email])
+    const auth = await db.query('SELECT "id" FROM "people" WHERE "email" = $1', [email])
     if (auth.rowCount === 0) {
       return res.sendStatus(401)
     }
 
-    let gamesSearch = await pool.query('SELECT * FROM "products" WHERE "type" = 1')
+    let gamesSearch = await db.query('SELECT * FROM "products" WHERE "type" = (SELECT "id" from "types" where name = \'games\' LIMIT 1)')
     const games = gamesSearch.rows.map(game => ({
       product: game.id,
       name: game.name,
