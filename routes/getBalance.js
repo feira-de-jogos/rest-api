@@ -7,14 +7,15 @@ const db = require('../db.js')
 
 router.get('/balance', async (req, res) => {
   let payload
+  let email
+
   try {
     const ticket = await client.verifyIdToken({
       audience,
       idToken: req.token
     })
     payload = ticket.getPayload()
-
-    var email = payload.email
+    email = payload.email
   } catch (err) {
     console.error(err)
     return res.sendStatus(401)
