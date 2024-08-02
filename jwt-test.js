@@ -9,6 +9,9 @@ const socket = io('https://feira-de-jogos.dev.br/arcade', { path: '/api/v2/machi
 
 socket.on('connect', () => {
   console.log('Connected')
-  socket.emit('state', 'ready')
-  socket.disconnect()
+  socket.emit('stateUpdate', 'idle')
+})
+
+socket.on('disconnect', () => {
+  console.log('Disconnected')
 })
