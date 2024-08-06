@@ -1,11 +1,5 @@
 require('dotenv').config()
 const { app, httpServer, io } = require('./http-server.js')
-const { OAuth2Client } = require('google-auth-library')
-const client = new OAuth2Client()
-const jwt = require('jsonwebtoken')
-const db = require('./db.js')
-
-const audience = process.env.GOOGLE_CLIENT_ID
 const port = process.env.PORT || 3000
 
 const postLogin = require('./routes/postLogin')
@@ -16,7 +10,6 @@ const getBalance = require('./routes/getBalance')
 const getGames = require('./routes/getGames')
 const getStatement = require('./routes/getStatement')
 const getProducts = require('./routes/getProducts')
-
 // Express routes
 app.use('/api/v2', postLogin)
 app.use('/api/v2', postTransfer)
