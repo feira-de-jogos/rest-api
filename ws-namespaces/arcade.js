@@ -1,7 +1,13 @@
 const jwt = require('jsonwebtoken')
 const { io } = require('../http-server.js')
+const Joi = require('joi')
 
 const secretKeyArcade = process.env.TOKEN_SECRET_KEY_ARCADE
+
+const coinInsertedSchema = Joi.object({
+  arcade: Joi.number().integer().positive().allow(0).required(),
+  operation: Joi.number().integer().positive().allow(0).required()
+});
 
 io.of('/arcade').use(async (socket, next) => {
   try {
@@ -15,7 +21,21 @@ io.of('/arcade').use(async (socket, next) => {
 })
 
 io.of('/arcade').on('connection', (socket) => {
-  socket.on('stateUpdate', (state) => {
-    console.log('Socket ' + socket.id + ': ' + JSON.stringify(state))
+  // Código de teste:
+  io.of('/arcade').emit('coinInsert', { arcade: 0, coins: 1, operation: 0 })
+
+  socket.on('coinInserted', (data) => {
+    const { error } = coinInsertedSchema.validate(data)
+    if (error) {
+      console.log(error)
+      return
+    }
+    console.log('coinInserted', data)
+
+    const { arcade, operation } = data
+    // Debitar as moedas do saldo do usuário
+
+    // Código de teste:
+    io.of('/arcade').emit('coinInsert', { arcade, coins: 1, operation })
   })
 })
