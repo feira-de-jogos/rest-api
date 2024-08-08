@@ -34,18 +34,14 @@ io.of('/vending-machine').on('connection', (socket) => {
       // Atualizar o estado da máquina de vendas no banco de dados para disponível
 
       // Código de teste:
-      io.of('/vending-machine').emit('stateMFA', { username: 'A', code: 1, operation })
+      // io.of('/vending-machine').emit('stateMFA', { username: 'A', code: 1, operation })
     } else if (state === 'mfa') {
       // Atualizar o estado da máquina de vendas no banco de dados para ocupado: aguardando MFA
 
       // Código de teste:
-      io.of('vending-machine').emit('stateReleasing', { product: '1', operation })
+      // io.of('vending-machine').emit('stateReleasing', { product: '1', operation })
     } else if (state === 'releasing') {
       // Atualizar o estado da máquina de vendas no banco de dados para ocupado: liberando produto
     }
-  })
-  // Teste De recebimento do codigo MFA
-  socket.on('stateMFA', (data) =>{
-    console.log('Data recebida no MFA:', [data])
   })
 })

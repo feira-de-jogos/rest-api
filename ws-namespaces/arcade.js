@@ -24,7 +24,7 @@ io.of('/arcade').use(async (socket, next) => {
 
 io.of('/arcade').on('connection', (socket) => {
   // Código de teste:
-  io.of('/arcade').emit('coinInsert', { arcade: 0, coins: 1, operation: 0 })
+  // io.of('/arcade').emit('coinInsert', { arcade: 0, coins: 1, operation: 0 })
 
   socket.on('coinInserted', (data) => {
     const { error } = coinInsertedSchema.validate(data)
@@ -38,6 +38,6 @@ io.of('/arcade').on('connection', (socket) => {
     // Debitar as moedas do saldo do usuário
 
     // Código de teste:
-    io.of('/arcade').emit('coinInsert', { arcade, coins: 1, operation })
+    // io.of('/arcade').emit('coinInsert', { arcade, coins: 1, operation })
   })
 })
