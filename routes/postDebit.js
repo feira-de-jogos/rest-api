@@ -44,14 +44,14 @@ router.post('/debit', async (req, res) => {
     // https://github.com/feira-de-jogos/docs/tree/main/v2#operação-de-débito
 
     // Verifica se a maquina existe
-    const machineSearch = await db.query('SELECT * from machines where "id" = $1', [machine])
+    const machineSearch = await db.query('SELECT * from "machines" WHERE "id" = $1', [machine])
     if (machineSearch.rowCount === 0) {
       // return res.sendStatus(403).message("maquina inexistente")
       return res.status(403).send("Maquina Inexistente");
     }
 
     // Verifica se o produto existe e se ele pode ser comprado por arcade/vending-machine
-    const productSearch = await db.query('SELECT type FROM products WHERE id = $1 AND (type = (SELECT "id" FROM "types" WHERE "name" = \'foods\' LIMIT 1) OR type = (SELECT "id" FROM "types" WHERE "name" = \'arcade\' LIMIT 1));', [product])
+    const productSearch = await db.query('SELECT "type" FROM "products" WHERE "id" = $1 AND (type = (SELECT "id" FROM "types" WHERE "name" = \'foods\' LIMIT 1) OR type = (SELECT "id" FROM "types" WHERE "name" = \'arcade\' LIMIT 1));', [product])
     if (productSearch.rowCount === 0) {
       //return res.sendStatus(403).message("produto inexistente")
       return res.status(403).send("Produto Inexistente");
@@ -59,7 +59,7 @@ router.post('/debit', async (req, res) => {
     const machineType = productSearch.rows[0].type
 
     // Verifica se o usu�rio tem dinheiro para comprar o produto
-    const valueProductSearch = await db.query('SELECT price FROM products WHERE id = $1;', [product])
+    const valueProductSearch = await db.query('SELECT "price" FROM "products" WHERE "id" = $1;', [product])
     productValue = valueProductSearch.rows[0].price;
 
     let expenses = await db.query('SELECT COALESCE(SUM("value"), 0) AS sum FROM "operations" WHERE "from" = $1 and "completed" = true', [userId])
@@ -76,16 +76,16 @@ router.post('/debit', async (req, res) => {
     }
 
     // Verifica se a m�quina esta ocupada
-    const machineBusySearch = await db.query('SELECT busy from machines WHERE id = $1', [machine])
+    const machineBusySearch = await db.query('SELECT "busy" FROM "machines" WHERE "id" = $1', [machine])
     if (machineBusySearch.rows[0].busy == true) {
       return res.status(403).send("Maquina Ocupada");
     }
 
-    const typeSearch = await db.query('SELECT name FROM types WHERE id = $1', [machineType])
+    const typeSearch = await db.query('SELECT "name" FROM "types" WHERE "id" = $1', [machineType])
     // Verifica se o produto � da vending machine 
     if (typeSearch.rows[0].name == 'foods') {
       // Verifica se esta em estoque
-      const stockSearch = await db.query('SELECT slot, quantity FROM stock WHERE machine = $1 AND product = $2;', [machine, product])
+      const stockSearch = await db.query('SELECT "slot", "quantity" FROM "stock" WHERE "machine" = $1 AND "product" = $2;', [machine, product])
       if (stockSearch.rowCount === 0 || stockSearch.rows[0].quantity == 0) {
         return res.status(403).send("Produto Fora de Estoque")
       }
@@ -96,7 +96,7 @@ router.post('/debit', async (req, res) => {
       // Gera o Mfa
       mfa = Math.floor(Math.random() * (99 - 11 + 1)) + 11
       //Insere a operação de débito
-      const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "mfa", "completed") VALUES($1, 1, $2, $3, NOW(), $4, false) RETURNING id', [userId, product, productValue, mfa])
+      const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "mfa", "completed") VALUES($1, 1, $2, $3, NOW(), $4, false) RETURNING "id"', [userId, product, productValue, mfa])
       var operationId = insertResult.rows[0].id
       // Manda o MFA para unity
       // Nao entendi esse codigo -- io.to('machine').emit('purchase', jsonString)
@@ -114,16 +114,13 @@ router.post('/debit', async (req, res) => {
       // O motor escolhido é a columa 'slot' da tabela 'stock'
       io.of('/vending-machine').emit('stateMFA', stateMfaObject)
       // io.of('/vending-machine').emit('stateReleasing', { product: slot, operation: 77 })
-    }
-
-    if (typeSearch.rows[0].name == 'arcade') {
-      // Maquina fica ocupada
-      // const updateMachineStatus = await db.query('UPDATE machines SET busy = true WHERE id = $1 ', [machine])
+    } else if (typeSearch.rows[0].name == 'arcade') {
       // Insere a opera��o de d�bito
-      const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "completed") VALUES($1, 1, $2, $3, NOW(), false) RETURNING id', [userId, product, productValue])
-      var operationId = insertResult.rows[0].id;
-      // io.of('/vending-machine').emit(...)
+      const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "completed") VALUES($1, 1, $2, $3, NOW(), false) RETURNING "id"', [userId, product, productValue])
+      var operationId = insertResult.rows[0].id
 
+      const slot = await db.query('SELECT "slot" FROM "stock" WHERE "machine" = $1 AND "product" = $2', [machine, product])
+      io.of('/arcade').emit('coinInsert', { arcade: slot, coins: 1, operation: operationId })
     }
 
     return res.status(201).send({ operation: operationId })
