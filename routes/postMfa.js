@@ -53,18 +53,8 @@ router.post('/mfa', async (req, res) => {
     // Localizar o produto no estoque (/debit já verificou se o produto está disponível)
     const { id, quantity, slot } = await db.query('SELECT "id", "quantity", "slot" FROM "stock" WHERE "product" = $1 and machine = (SELECT "id" from "machines" where "name" LIKE \'vending-machine%\' LIMIT 1);', product)
 
-    // Retirar 1 unidade
-    await db.query('UPDATE "stock" SET "quantity" = $1 WHERE "id" = $2;', [quantity - 1, id], (err, result) => {
-      if (err) {
-        console.error(err)
-        return res.sendStatus(500)
-      }
-      console.log(`Produto ${product} a ser liberdo:`, result)
-
-      // Emitir evento para a máquina de vendas
-      io.of('/vending-machine').emit('stateReleasing', { product: slot, operation: operation })
-    })
-
+    // Emitir evento para a máquina de vendas
+    io.of('/vending-machine').emit('stateReleasing', { product: slot, operation: operation })
     return res.sendStatus(200)
   } catch (err) {
     console.error(err)

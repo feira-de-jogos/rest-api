@@ -42,13 +42,22 @@ io.of('/vending-machine').on('connection', (socket) => {
       // Operation = 0 is reserved for vending machine setup
       // Operation > 0 is a product release operation
       if (operation > 0) {
-        db.query('UPDATE "operations" set "completed" = true WHERE "id" = $1;', [operation], (err) => {
+        db.query('UPDATE "stock" SET "quantity" = $1 WHERE "id" = $2;', [quantity - 1, id], (err, result) => {
           if (err) {
             console.error(err)
-            return
+            return res.sendStatus(500)
           }
           console.log(`Product released: operation ${operation}`)
+
+          db.query('UPDATE "operations" set "completed" = true WHERE "id" = $1;', [operation], (err) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+            console.log(`Operation updated: operation ${operation}`)
+          })
         })
+
       }
 
     } else if (state === 'mfa') {
