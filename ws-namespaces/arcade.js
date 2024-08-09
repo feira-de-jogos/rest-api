@@ -23,9 +23,6 @@ io.of('/arcade').use(async (socket, next) => {
 })
 
 io.of('/arcade').on('connection', (socket) => {
-  // Código de teste:
-  // io.of('/arcade').emit('coinInsert', { arcade: 0, coins: 1, operation: 0 })
-
   socket.on('coinInserted', (data) => {
     const { error } = coinInsertedSchema.validate(data)
     if (error) {
@@ -35,9 +32,12 @@ io.of('/arcade').on('connection', (socket) => {
     console.log('coinInserted', data)
 
     const { arcade, operation } = data
-    // Debitar as moedas do saldo do usuário
-
-    // Código de teste:
-    // io.of('/arcade').emit('coinInsert', { arcade, coins: 1, operation })
+    db.query('UPDATE "operations" set "completed" = true WHERE "id" = $1;', [operation], (err) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      console.log(`Coin inserted: arcade ${arcade}, operation ${operation}`)
+    })
   })
 })

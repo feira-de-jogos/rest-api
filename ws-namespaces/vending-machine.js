@@ -39,8 +39,18 @@ io.of('/vending-machine').on('connection', (socket) => {
         console.log('Machine state updated to idle')
       })
 
-      // Código de teste:
-      // io.of('/vending-machine').emit('stateMFA', { username: 'A', code: 1, operation })
+      // Operation = 0 is reserved for vending machine setup
+      // Operation > 0 is a product release operation
+      if (operation > 0) {
+        db.query('UPDATE "operations" set "completed" = true WHERE "id" = $1;', [operation], (err) => {
+          if (err) {
+            console.error(err)
+            return
+          }
+          console.log(`Product released: operation ${operation}`)
+        })
+      }
+
     } else if (state === 'mfa') {
       db.query('UPDATE "machines" SET "busy" = true WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
         if (err) {
@@ -49,9 +59,6 @@ io.of('/vending-machine').on('connection', (socket) => {
         }
         console.log('Machine state updated to busy (MFA)')
       })
-
-      // Código de teste:
-      // io.of('vending-machine').emit('stateReleasing', { product: '1', operation })
     } else if (state === 'releasing') {
       db.query('UPDATE "machines" SET "busy" = true WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
         if (err) {
