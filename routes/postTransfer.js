@@ -7,8 +7,8 @@ const audience = process.env.GOOGLE_CLIENT_ID
 const db = require('../db.js')
 
 const transferSchema = Joi.object({
-  to: Joi.number().integer().required(),
-  value: Joi.number().integer().required(),
+  to: Joi.number().integer().positive().allow(0).required(),
+  value: Joi.number().integer().positive().required(),
 });
 
 router.post('/transfer', async (req, res) => {
@@ -71,7 +71,7 @@ router.post('/transfer', async (req, res) => {
     const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "completed") VALUES($1, $2, (SELECT "id" FROM "products" WHERE "type" = (SELECT "id" FROM "types" WHERE "name" = \'transfer\' LIMIT 1) LIMIT 1), $3, NOW(), true) RETURNING "id"', [userId, to, value])
     const operationId = insertResult.rows[0].id
 
-    return res.status(200).send({ operation: operationId })
+    return res.status(201).send({ operation: operationId })
   } catch (err) {
     console.error(err)
     return res.sendStatus(500)
