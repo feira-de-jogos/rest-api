@@ -9,7 +9,7 @@ const db = require('../db.js')
 
 const MfaSchema = Joi.object({
   operation: Joi.number().integer().positive().required(),
-  code: Joi.number().pattern(new RegExp('^[1-9][0-9]$')).required(),
+  code: Joi.number().integer().min(10).max(99).required(),
 });
 
 router.post('/mfa', async (req, res) => {
