@@ -65,4 +65,4 @@ io.of('/api/v2/machine').use(async (socket, next) => {
 
 // io.of('/vending-machine').broadcast.emit(...)
 
-io.of('/api/v2/machine').on('connection', (socket) => { })
+io.of('/api/v2/machine').on('connection', async (socket) => { })

@@ -21,8 +21,8 @@ io.of('/vending-machine').use(async (socket, next) => {
   }
 })
 
-io.of('/vending-machine').on('connection', (socket) => {
-  socket.on('stateUpdate', (data) => {
+io.of('/vending-machine').on('connection', async (socket) => {
+  socket.on('stateUpdate', async (data) => {
     const { error } = stateUpdateSchema.validate(data)
     if (error) {
       console.log(error)
@@ -31,7 +31,7 @@ io.of('/vending-machine').on('connection', (socket) => {
 
     const { state, operation } = data
     if (state === 'idle') {
-      db.query('UPDATE "machines" SET "busy" = false WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
+      await db.query('UPDATE "machines" SET "busy" = false WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
         if (err) {
           console.error(err)
           return
@@ -42,26 +42,31 @@ io.of('/vending-machine').on('connection', (socket) => {
       // Operation = 0 is reserved for vending machine setup
       // Operation > 0 is a product release operation
       if (operation > 0) {
-        db.query('UPDATE "stock" SET "quantity" = $1 WHERE "id" = $2;', [quantity - 1, id], (err, result) => {
+        let product = await db.query('SELECT "product" as "id" FROM "operations" WHERE "id" = $1', [operation], (err) => {
           if (err) {
             console.error(err)
-            return res.sendStatus(500)
+            return
           }
-          console.log(`Product released: operation ${operation}`)
-
-          db.query('UPDATE "operations" set "completed" = true WHERE "id" = $1;', [operation], (err) => {
-            if (err) {
-              console.error(err)
-              return
-            }
-            console.log(`Operation updated: operation ${operation}`)
-          })
         })
 
-      }
+        await db.query('UPDATE "stock" SET "quantity" = "quantity" - 1 WHERE "product" = $1;', [product.rows[0].id], (err) => {
+          if (err) {
+            console.error(err)
+            return
+          }
+          console.log(`Product released: operation ${operation}`)
+        })
 
+        await db.query('UPDATE "operations" set "completed" = true WHERE "id" = $1;', [operation], (err) => {
+          if (err) {
+            console.error(err)
+            return
+          }
+          console.log(`Operation updated: operation ${operation}`)
+        })
+      }
     } else if (state === 'mfa') {
-      db.query('UPDATE "machines" SET "busy" = true WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
+      await db.query('UPDATE "machines" SET "busy" = true WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
         if (err) {
           console.error(err)
           return
@@ -69,7 +74,7 @@ io.of('/vending-machine').on('connection', (socket) => {
         console.log('Machine state updated to busy (MFA)')
       })
     } else if (state === 'releasing') {
-      db.query('UPDATE "machines" SET "busy" = true WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
+      await db.query('UPDATE "machines" SET "busy" = true WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
         if (err) {
           console.error(err)
           return

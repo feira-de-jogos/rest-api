@@ -89,15 +89,17 @@ router.post('/debit', async (req, res) => {
       if (stockSearch.rowCount === 0 || stockSearch.rows[0].quantity == 0) {
         return res.status(403).send("Produto Fora de Estoque")
       }
-      let slot = stockSearch.rowCount[0].slot
-
+      
       // Maquina fica ocupada
       const updateMachineStatus = await db.query('UPDATE "machines" SET "busy" = true WHERE "id" = $1 ', [machine])
+      
       // Gera o Mfa
       mfa = Math.floor(Math.random() * (99 - 11 + 1)) + 11
+
       //Insere a operação de débito
       const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "mfa", "completed") VALUES($1, 1, $2, $3, NOW(), $4, false) RETURNING "id"', [userId, product, productValue, mfa])
       var operationId = insertResult.rows[0].id
+      
       // Manda o MFA para unity
       // Nao entendi esse codigo -- io.to('machine').emit('purchase', jsonString)
       let userName = await db.query('SELECT "name" FROM "people" WHERE "email" = $1 ', [email])

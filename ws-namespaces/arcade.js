@@ -22,7 +22,7 @@ io.of('/arcade').use(async (socket, next) => {
   }
 })
 
-io.of('/arcade').on('connection', (socket) => {
+io.of('/arcade').on('connection', async (socket) => {
   socket.on('coinInserted', (data) => {
     const { error } = coinInsertedSchema.validate(data)
     if (error) {

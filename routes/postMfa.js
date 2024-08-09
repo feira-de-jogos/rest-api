@@ -51,7 +51,8 @@ router.post('/mfa', async (req, res) => {
     }
 
     // Localizar o produto no estoque (/debit já verificou se o produto está disponível)
-    const { id, quantity, slot } = await db.query('SELECT "id", "quantity", "slot" FROM "stock" WHERE "product" = $1 and machine = (SELECT "id" from "machines" where "name" LIKE \'vending-machine%\' LIMIT 1);', product)
+    let stockSearchSlot =  await db.query('SELECT "slot" FROM "stock" WHERE "product" = $1 and machine = (SELECT "id" from "machines" where "name" LIKE \'vending-machine%\' LIMIT 1);', [product])
+    const slot = stockSearchSlot.rows[0].slot
 
     // Emitir evento para a máquina de vendas
     io.of('/vending-machine').emit('stateReleasing', { product: slot, operation: operation })
