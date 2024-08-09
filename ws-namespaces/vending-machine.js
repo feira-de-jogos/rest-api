@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const { io } = require('../http-server.js')
 const Joi = require('joi');
+const db = require('../db.js')
 
 const secretKeyVendingMachine = process.env.TOKEN_SECRET_KEY_VENDING_MACHINE
 
@@ -27,21 +28,38 @@ io.of('/vending-machine').on('connection', (socket) => {
       console.log(error)
       return
     }
-    console.log('stateUpdate', data)
 
     const { state, operation } = data
     if (state === 'idle') {
-      // Atualizar o estado da máquina de vendas no banco de dados para disponível
+      db.query('UPDATE "machines" SET "busy" = false WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
+        if (err) {
+          console.error(err)
+          return
+        }
+        console.log('Machine state updated to idle')
+      })
 
       // Código de teste:
       // io.of('/vending-machine').emit('stateMFA', { username: 'A', code: 1, operation })
     } else if (state === 'mfa') {
-      // Atualizar o estado da máquina de vendas no banco de dados para ocupado: aguardando MFA
+      db.query('UPDATE "machines" SET "busy" = true WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
+        if (err) {
+          console.error(err)
+          return
+        }
+        console.log('Machine state updated to busy (MFA)')
+      })
 
       // Código de teste:
       // io.of('vending-machine').emit('stateReleasing', { product: '1', operation })
     } else if (state === 'releasing') {
-      // Atualizar o estado da máquina de vendas no banco de dados para ocupado: liberando produto
+      db.query('UPDATE "machines" SET "busy" = true WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
+        if (err) {
+          console.error(err)
+          return
+        }
+        console.log('Machine state updated to busy (releasing)')
+      })
     }
   })
 })
