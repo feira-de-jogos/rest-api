@@ -4,7 +4,7 @@ const router = express.Router()
 const { OAuth2Client } = require('google-auth-library')
 const Joi = require('joi');
 const client = new OAuth2Client()
-const audience = process.env.GOOGLE_CLIENT_ID
+const audience = process.env.GOOGLE_CLIENT_ID.split(' ')
 const db = require('../db.js')
 
 const transferSchema = Joi.object({
