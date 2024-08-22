@@ -26,6 +26,5 @@ app.use('/api/v2', getProducts)
 require('./ws-namespaces/default.js')
 require('./ws-namespaces/vending-machine.js')
 require('./ws-namespaces/arcade.js')
-require('./ws-namespaces/api-v2-machine.js')
 
 httpServer.listen(port, () => { console.log('Server running!') })
