@@ -30,6 +30,7 @@ io.of('/vending-machine').on('connection', async (socket) => {
     }
 
     const { state, operation } = data
+    io.of('/vending-machine').emit('stateUpdate', data)
     if (state === 'idle') {
       await db.query('UPDATE "machines" SET "busy" = false WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
         if (err) {

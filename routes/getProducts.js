@@ -27,14 +27,15 @@ router.get('/products', async (req, res) => {
       return res.sendStatus(401)
     }
 
-    let productSearch = await db.query('SELECT "products"."id" AS "id", "products"."name" AS "name", "products"."description" AS "description", "products"."image" AS "image", "products"."price" AS "price", "stock"."quantity" AS "stock" FROM "products" INNER JOIN "stock" ON "products"."id" = "stock"."product" WHERE "type" = (SELECT "id" FROM "types" WHERE "name" = \'foods\' LIMIT 1);')
+    let productSearch = await db.query('SELECT "products"."id" AS "id", "products"."name" AS "name", "products"."description" AS "description", "products"."image" AS "image", "products"."price" AS "price", "stock"."quantity" AS "stock", "types"."name" AS "type" FROM "products" INNER JOIN "stock" ON "products"."id" = "stock"."product" INNER JOIN "types" ON "products"."type" = "types"."id" WHERE "types"."name" = \'foods\' OR "types"."name" = \'arcade\' ORDER BY "products"."price" ASC;')
     const products = productSearch.rows.map(product => ({
       product: product.id,
       name: product.name,
       description: product.description,
       image: product.image,
       price: product.price,
-      stock: product.stock
+      stock: product.stock,
+      type: product.type
     }));
 
     return res.status(200).json(products);

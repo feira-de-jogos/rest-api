@@ -8,8 +8,7 @@ const audience = process.env.GOOGLE_CLIENT_ID.split(' ')
 const db = require('../db.js')
 
 const transferSchema = Joi.object({
-  machine: Joi.number().integer().positive().allow(0).required(),
-  product: Joi.number().integer().positive().allow(0).required(),
+  product: Joi.number().integer().positive().allow(0).required()
 });
 
 router.post('/debit', async (req, res) => {
@@ -38,12 +37,7 @@ router.post('/debit', async (req, res) => {
       return res.status(401).send("Usuario Não Existente no Banco de Dados!")
     }
     const userId = auth.rows[0].id
-    const { machine, product } = req.body
-
-    const machineSearch = await db.query('SELECT * from "machines" WHERE "id" = $1', [machine])
-    if (machineSearch.rowCount === 0) {
-      return res.status(403).send("Maquina Inexistente");
-    }
+    const { product } = req.body
 
     const productSearch = await db.query('SELECT "type" FROM "products" WHERE "id" = $1 AND (type = (SELECT "id" FROM "types" WHERE "name" = \'foods\' LIMIT 1) OR type = (SELECT "id" FROM "types" WHERE "name" = \'arcade\' LIMIT 1));', [product])
     if (productSearch.rowCount === 0) {
@@ -64,6 +58,9 @@ router.post('/debit', async (req, res) => {
     if (productValue > BalanceValue) {
       return res.status(402).send("Saldo Insuficiente");
     }
+
+    const machineSearch = await db.query('SELECT "machine" FROM "stock" WHERE "product" = $1', [product]);
+    const machine = machineSearch.rows[0].machine
 
     const machineBusySearch = await db.query('SELECT "busy" FROM "machines" WHERE "id" = $1', [machine])
     if (machineBusySearch.rows[0].busy == true) {
@@ -91,7 +88,6 @@ router.post('/debit', async (req, res) => {
         operation: operationId
       }
 
-      console.log("Enviando websocket:", [stateMfaObject])
       io.of('/vending-machine').emit('stateMFA', stateMfaObject)
       setTimeout(() => {
         db.query('UPDATE "machines" SET "busy" = false WHERE "id" = $1', [machine]), 30000
@@ -100,7 +96,12 @@ router.post('/debit', async (req, res) => {
       const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "completed") VALUES($1, 1, $2, $3, NOW(), false) RETURNING "id"', [userId, product, productValue])
       var operationId = insertResult.rows[0].id
 
-      const slot = await db.query('SELECT "slot" FROM "stock" WHERE "machine" = $1 AND "product" = $2', [machine, product])
+      const stockSearch = await db.query('SELECT "slot" FROM "stock" WHERE "machine" = $1 AND "product" = $2 LIMIT 1', [machine, product])
+      if (stockSearch.rowCount === 0) {
+        return res.status(403).send("Produto Fora de Estoque")
+      }
+      const slot = stockSearch.rows[0].slot
+
       io.of('/arcade').emit('coinInsert', { arcade: slot, coins: 1, operation: operationId })
     }
 

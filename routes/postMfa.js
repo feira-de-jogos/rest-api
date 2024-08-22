@@ -47,15 +47,27 @@ router.post('/mfa', async (req, res) => {
     const product = operationSearch.rows[0].product
 
     if (MfaNumber != code) {
-      return res.status(403).send("Código Mfa inválido, tente novamente!")
+      return res.status(403).send("Código MFA inválido.\nTente novamente!")
     }
 
-    // Localizar o produto no estoque (/debit já verificou se o produto está disponível)
-    let stockSearchSlot =  await db.query('SELECT "slot" FROM "stock" WHERE "product" = $1 and machine = (SELECT "id" from "machines" where "name" LIKE \'vending-machine%\' LIMIT 1);', [product])
+    let stockSearchSlot = await db.query('SELECT "slot" FROM "stock" WHERE "product" = $1 and machine = (SELECT "id" from "machines" where "name" LIKE \'vending-machine%\' LIMIT 1);', [product])
     const slot = stockSearchSlot.rows[0].slot
 
-    // Emitir evento para a máquina de vendas
+    //let attempts = 0
+    // let machines = await db.query('SELECT COUNT(id) as "count" FROM "machines" WHERE "name" LIKE \'vending%\' LIMIT 1;')
+    // while (attempts < 3) {
+    //  if (io.of('/vending-machine').sockets.size >= machines.rows[0].count) {
     io.of('/vending-machine').emit('stateReleasing', { product: slot, operation: operation })
+    //    console.log("State machine to: releasing")
+    //    break
+    //  }
+    //  attempts++
+    //  await new Promise(resolve => setTimeout(resolve, 1000))
+    // }
+    // if (attempts === 3) {
+    //   return res.status(500).send("Falha ao conectar com a máquina de vendas!");
+    // }
+
     return res.sendStatus(200)
   } catch (err) {
     console.error(err)
