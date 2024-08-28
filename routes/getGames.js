@@ -34,9 +34,9 @@ router.get('/games', async (req, res) => {
       description: game.description,
       image: game.image,
       url: game.url
-    }));
+    }))
 
-    return res.status(200).json(games);
+    return res.status(200).json(games)
   } catch (err) {
     console.error(err)
     return res.sendStatus(500)

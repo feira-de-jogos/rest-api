@@ -2,14 +2,14 @@ const { io } = require('../http-server.js')
 const express = require('express')
 const router = express.Router()
 const { OAuth2Client } = require('google-auth-library')
-const Joi = require('joi');
+const Joi = require('joi')
 const client = new OAuth2Client()
 const audience = process.env.GOOGLE_CLIENT_ID.split(' ')
 const db = require('../db.js')
 
 const transferSchema = Joi.object({
   product: Joi.number().integer().positive().allow(0).required()
-});
+})
 
 router.post('/debit', async (req, res) => {
   let payload
@@ -27,7 +27,7 @@ router.post('/debit', async (req, res) => {
   }
 
   try {
-    const { error } = transferSchema.validate(req.body);
+    const { error } = transferSchema.validate(req.body)
     if (error) {
       return res.status(400).send({ error: error.details[0].message })
     }
@@ -41,12 +41,12 @@ router.post('/debit', async (req, res) => {
 
     const productSearch = await db.query('SELECT "type" FROM "products" WHERE "id" = $1 AND (type = (SELECT "id" FROM "types" WHERE "name" = \'foods\' LIMIT 1) OR type = (SELECT "id" FROM "types" WHERE "name" = \'arcade\' LIMIT 1));', [product])
     if (productSearch.rowCount === 0) {
-      return res.status(403).send("Produto Inexistente");
+      return res.status(403).send("Produto Inexistente")
     }
     const machineType = productSearch.rows[0].type
 
     const valueProductSearch = await db.query('SELECT "price" FROM "products" WHERE "id" = $1;', [product])
-    productValue = valueProductSearch.rows[0].price;
+    productValue = valueProductSearch.rows[0].price
 
     let expenses = await db.query('SELECT COALESCE(SUM("value"), 0) AS sum FROM "operations" WHERE "from" = $1 and "completed" = true', [userId])
     expenses = parseInt(expenses.rows[0].sum)
@@ -54,17 +54,17 @@ router.post('/debit', async (req, res) => {
     let revenues = await db.query('SELECT COALESCE(SUM("value"), 0) AS sum FROM "operations" WHERE "to" = $1 and "completed" = true', [userId])
     revenues = parseInt(revenues.rows[0].sum)
 
-    let BalanceValue = revenues - expenses;
+    let BalanceValue = revenues - expenses
     if (productValue > BalanceValue) {
-      return res.status(402).send("Saldo Insuficiente");
+      return res.status(402).send("Saldo Insuficiente")
     }
 
-    const machineSearch = await db.query('SELECT "machine" FROM "stock" WHERE "product" = $1', [product]);
+    const machineSearch = await db.query('SELECT "machine" FROM "stock" WHERE "product" = $1', [product])
     const machine = machineSearch.rows[0].machine
 
     const machineBusySearch = await db.query('SELECT "busy" FROM "machines" WHERE "id" = $1', [machine])
     if (machineBusySearch.rows[0].busy == true) {
-      return res.status(403).send("Maquina Ocupada");
+      return res.status(403).send("Maquina Ocupada")
     }
 
     const typeSearch = await db.query('SELECT "name" FROM "types" WHERE "id" = $1', [machineType])

@@ -2,7 +2,7 @@ const { io } = require('../http-server.js')
 const express = require('express')
 const router = express.Router()
 const { OAuth2Client } = require('google-auth-library')
-const Joi = require('joi');
+const Joi = require('joi')
 const client = new OAuth2Client()
 const audience = process.env.GOOGLE_CLIENT_ID.split(' ')
 const db = require('../db.js')
@@ -10,7 +10,7 @@ const db = require('../db.js')
 const MfaSchema = Joi.object({
   operation: Joi.number().integer().positive().required(),
   code: Joi.number().integer().min(10).max(99).required(),
-});
+})
 
 router.post('/mfa', async (req, res) => {
   let payload
@@ -28,7 +28,7 @@ router.post('/mfa', async (req, res) => {
   }
 
   try {
-    const { error } = MfaSchema.validate(req.body);
+    const { error } = MfaSchema.validate(req.body)
     if (error) {
       return res.status(400).send({ error: error.details[0].message })
     }
@@ -52,21 +52,7 @@ router.post('/mfa', async (req, res) => {
 
     let stockSearchSlot = await db.query('SELECT "slot" FROM "stock" WHERE "product" = $1 and machine = (SELECT "id" from "machines" where "name" LIKE \'vending-machine%\' LIMIT 1);', [product])
     const slot = stockSearchSlot.rows[0].slot
-
-    //let attempts = 0
-    // let machines = await db.query('SELECT COUNT(id) as "count" FROM "machines" WHERE "name" LIKE \'vending%\' LIMIT 1;')
-    // while (attempts < 3) {
-    //  if (io.of('/vending-machine').sockets.size >= machines.rows[0].count) {
     io.of('/vending-machine').emit('stateReleasing', { product: slot, operation: operation })
-    //    console.log("State machine to: releasing")
-    //    break
-    //  }
-    //  attempts++
-    //  await new Promise(resolve => setTimeout(resolve, 1000))
-    // }
-    // if (attempts === 3) {
-    //   return res.status(500).send("Falha ao conectar com a máquina de vendas!");
-    // }
 
     return res.sendStatus(200)
   } catch (err) {

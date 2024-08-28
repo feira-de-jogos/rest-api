@@ -37,7 +37,7 @@ router.get('/statement', async (req, res) => {
       value: statement.value,
       timestamp: statement.timestamp,
       completed: statement.completed
-    }));
+    }))
 
     return res.status(200).json(statement)
   } catch (err) {

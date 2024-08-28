@@ -34,7 +34,7 @@ router.get('/balance', async (req, res) => {
     let revenues = await db.query('SELECT COALESCE(SUM("value"), 0) AS sum FROM "operations" WHERE "to" = $1 and completed = true', [userId])
     revenues = parseInt(revenues.rows[0].sum)
 
-    let BalanceValue = revenues - expenses;
+    let BalanceValue = revenues - expenses
 
     return res.status(200).send({ balance: BalanceValue })
   } catch (err) {

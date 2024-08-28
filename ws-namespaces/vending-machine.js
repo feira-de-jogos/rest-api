@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { io } = require('../http-server.js')
-const Joi = require('joi');
+const Joi = require('joi')
 const db = require('../db.js')
 
 const secretKeyVendingMachine = process.env.TOKEN_SECRET_KEY_VENDING_MACHINE
@@ -8,7 +8,7 @@ const secretKeyVendingMachine = process.env.TOKEN_SECRET_KEY_VENDING_MACHINE
 const stateUpdateSchema = Joi.object({
   state: Joi.string().required(),
   operation: Joi.number().integer().positive().allow(0).required()
-});
+})
 
 io.of('/vending-machine').use(async (socket, next) => {
   try {

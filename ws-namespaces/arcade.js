@@ -9,7 +9,7 @@ const secretKeyArcade = process.env.TOKEN_SECRET_KEY_ARCADE || signToken.rows[0]
 const coinInsertedSchema = Joi.object({
   arcade: Joi.number().integer().positive().allow(0).required(),
   operation: Joi.number().integer().positive().allow(0).required()
-});
+})
 
 io.of('/arcade').use(async (socket, next) => {
   try {

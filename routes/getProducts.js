@@ -36,9 +36,9 @@ router.get('/products', async (req, res) => {
       price: product.price,
       stock: product.stock,
       type: product.type
-    }));
+    }))
 
-    return res.status(200).json(products);
+    return res.status(200).json(products)
   } catch (err) {
     console.error(err)
     return res.sendStatus(500)
