@@ -12,8 +12,8 @@ const io = new Server(httpServer, {
 })
 
 app.use(cors({
-//   origin: [/feira-de-jogos\.dev\.br$/],
-//   methods: 'POST'
+   origin: [/feira-de-jogos\.dev\.br$/],
+   methods: 'POST'
 }))
 app.use(express.json())
 app.use(authBearerParser())
