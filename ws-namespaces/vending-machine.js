@@ -3,7 +3,8 @@ const { io } = require('../http-server.js')
 const Joi = require('joi')
 const db = require('../db.js')
 
-const secretKeyVendingMachine = process.env.TOKEN_SECRET_KEY_VENDING_MACHINE
+const signToken = db.query('SELECT "token" FROM "machines" WHERE "name" like \'vending-machine-%\' LIMIT 1;')
+const secretKeyVendingMachine = process.env.TOKEN_SECRET_KEY_VENDING_MACHINE || signToken.rows[0].token
 
 const stateUpdateSchema = Joi.object({
   state: Joi.string().required(),
