@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { app, httpServer, io } = require('./http-server.js')
+const { app, httpServer } = require('./http-server.js')
 const port = process.env.PORT || 3000
 
 const postLogin = require('./routes/postLogin')
@@ -11,7 +11,7 @@ const getBalance = require('./routes/getBalance')
 const getGames = require('./routes/getGames')
 const getStatement = require('./routes/getStatement')
 const getProducts = require('./routes/getProducts')
-// Express routes
+
 app.use('/api/v2', postLogin)
 app.use('/api/v2', postTransfer)
 app.use('/api/v2', postDebit)
@@ -22,7 +22,6 @@ app.use('/api/v2', getGames)
 app.use('/api/v2', getStatement)
 app.use('/api/v2', getProducts)
 
-// WebSocket namespaces
 require('./ws-namespaces/default.js')
 require('./ws-namespaces/vending-machine.js')
 require('./ws-namespaces/arcade.js')
