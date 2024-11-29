@@ -62,7 +62,7 @@ router.post('/credit', async (req, res) => {
       return res.set('Retry-After', retryAfter.toString()).sendStatus(429)
     }
 
-    const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "completed") VALUES(1, $1, $2, $3, NOW(), true) RETURNING "id"', [userId, product, value])
+    const insertResult = await db.query('INSERT INTO "operations"("from", "to", "product", "value", "date", "completed") VALUES(1, $1, $2, $3, NOW(), true) RETURNING "id"', [userId, product, productSearch.rows[0].price > 0 ? productSearch.rows[0].price : value])
     const operationId = insertResult.rows[0].id
 
     return res.status(201).send({ operation: operationId })
