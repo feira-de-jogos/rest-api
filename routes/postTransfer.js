@@ -61,10 +61,10 @@ router.post('/transfer', async (req, res) => {
       return res.sendStatus(403)
     }
 
-    const lastOperations = await db.query('SELECT EXTRACT(EPOCH FROM (NOW() - "date")) AS "seconds_elapsed" FROM "operations" WHERE "from" = $1 AND "product" = (SELECT "id" FROM "products" WHERE "type" = (SELECT "id" FROM "types" WHERE "name" = \'transfer\' LIMIT 1) LIMIT 1) AND "date" >= NOW() - INTERVAL \'5 minutes\' ORDER BY "date" DESC LIMIT 1;', [userId])
+    const lastOperations = await db.query('SELECT EXTRACT(EPOCH FROM (NOW() - "date")) AS "seconds_elapsed" FROM "operations" WHERE "from" = $1 AND "product" = (SELECT "id" FROM "products" WHERE "type" = (SELECT "id" FROM "types" WHERE "name" = \'transfer\' LIMIT 1) LIMIT 1) AND "date" >= NOW() - INTERVAL \'4 hours\' ORDER BY "date" DESC LIMIT 1;', [userId])
     if (lastOperations.rowCount !== 0) {
       const secondsElapsed = parseFloat(lastOperations.rows[0].seconds_elapsed)
-      const retryAfter = Math.ceil(300 - secondsElapsed)
+      const retryAfter = Math.ceil(4 * 60 * 60 - secondsElapsed)
       return res.set('Retry-After', retryAfter.toString()).sendStatus(429)
     }
 

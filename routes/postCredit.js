@@ -55,10 +55,10 @@ router.post('/credit', async (req, res) => {
       return res.sendStatus(403)
     }
 
-    const lastOperations = await db.query('SELECT EXTRACT(EPOCH FROM (NOW() - "date")) AS "seconds_elapsed" FROM "operations" WHERE "to" = $1 AND "product" = $2 AND "date" >= NOW() - INTERVAL \'5 minutes\' ORDER BY "date" DESC LIMIT 1;', [userId, product])
+    const lastOperations = await db.query('SELECT EXTRACT(EPOCH FROM (NOW() - "date")) AS "seconds_elapsed" FROM "operations" WHERE "to" = $1 AND "product" = $2 AND "date" >= NOW() - INTERVAL \'4 hours\' ORDER BY "date" DESC LIMIT 1;', [userId, product])
     if (lastOperations.rowCount !== 0) {
       const secondsElapsed = parseFloat(lastOperations.rows[0].seconds_elapsed)
-      const retryAfter = Math.ceil(300 - secondsElapsed)
+      const retryAfter = Math.ceil(4 * 60 * 60 - secondsElapsed)
       return res.set('Retry-After', retryAfter.toString()).sendStatus(429)
     }
 
