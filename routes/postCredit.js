@@ -5,6 +5,8 @@ const Joi = require('joi')
 const client = new OAuth2Client()
 const audience = process.env.GOOGLE_CLIENT_ID_GAMES.split(' ')
 const db = require('../db.js')
+const crypto = require('crypto')
+
 
 const transferSchema = Joi.object({
   product: Joi.number().integer().positive().allow(0).required(),
@@ -38,7 +40,16 @@ router.post('/credit', async (req, res) => {
       return res.sendStatus(401)
     }
     const userId = auth.rows[0].id
-    const { product, value } = req.body
+
+    const { product, value, CSRF } = req.body
+
+    // CSRF ativo apenas para o jogo 16
+    if (product === 16) {
+      const isValid = validateToken(CSRF)
+      if (!isValid) {
+        return res.sendStatus(401)
+      }
+    }
 
     const productSearch = await db.query('SELECT * from "products" WHERE "id" = $1 AND "type" = (SELECT "id" FROM "types" WHERE "name" = \'games\' LIMIT 1)', [product])
     if (productSearch.rowCount === 0) {
@@ -71,5 +82,52 @@ router.post('/credit', async (req, res) => {
     return res.sendStatus(500)
   }
 })
+
+const validateToken = (token) => {
+  if (!token) {
+    return false;
+  }
+
+  const parts = token.split(":");
+  if (parts.length !== 4) {
+    return false;
+  }
+
+  const [nonce, ivHex, encTs, sig] = parts;
+  const payload = `${nonce}:${ivHex}:${encTs}`;
+
+  const keyMaterial = crypto.createHash("sha256").update("feira-de-jogos").digest();
+  const expectedSig = crypto.createHmac("sha256", keyMaterial)
+    .update(payload)
+    .digest("hex");
+
+  if (sig !== expectedSig) {
+    return false;
+  }
+
+  try {
+    const iv = Buffer.from(ivHex, "hex");
+
+    const key = crypto.createHash("sha256")
+      .update("feira-de-jogos")
+      .digest();
+
+    const decipher = crypto.createDecipheriv("aes-256-ctr", key, iv);
+
+    const decrypted = decipher.update(encTs, "hex", "utf8") + decipher.final("utf8");
+    const ts = parseInt(decrypted, 10);
+
+    // token valido por 60 segundos
+    if (isNaN(ts) || Date.now() - ts > 60_000) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Erro ao descriptografar:", error.message)
+    return false;
+  }
+};
+
 
 module.exports = router
