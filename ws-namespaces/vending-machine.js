@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { io } = require('../http-server.js')
+const { ioMachine } = require('../http-server.js')
 const Joi = require('joi')
 const db = require('../db.js')
 
@@ -11,7 +11,7 @@ const stateUpdateSchema = Joi.object({
   operation: Joi.number().integer().positive().allow(0).required()
 })
 
-io.of('/vending-machine').use(async (socket, next) => {
+ioMachine.of('/vending-machine').use(async (socket, next) => {
   try {
     const token = socket.handshake.auth.token
     jwt.verify(token, secretKeyVendingMachine)
@@ -22,7 +22,7 @@ io.of('/vending-machine').use(async (socket, next) => {
   }
 })
 
-io.of('/vending-machine').on('connection', async (socket) => {
+ioMachine.of('/vending-machine').on('connection', async (socket) => {
   socket.on('stateUpdate', async (data) => {
     const { error } = stateUpdateSchema.validate(data)
     if (error) {
@@ -31,7 +31,7 @@ io.of('/vending-machine').on('connection', async (socket) => {
     }
 
     const { state, operation } = data
-    io.of('/vending-machine').emit('stateUpdate', data)
+    ioMachine.of('/vending-machine').emit('stateUpdate', data)
     if (state === 'idle') {
       await db.query('UPDATE "machines" SET "busy" = false WHERE "name" = (SELECT "name" FROM "machines" WHERE "name" LIKE \'vending-machine%\' LIMIT 1);', (err) => {
         if (err) {

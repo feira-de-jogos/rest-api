@@ -6,7 +6,11 @@ const authBearerParser = require('auth-bearer-parser').default
 const app = express()
 const httpServer = createServer(app)
 const cors = require('cors')
-const io = new Server(httpServer, {
+const ioGame = new Server(httpServer, {
+  path: '/api/v2/game/',
+  cors: { origin: '*' }
+})
+const ioMachine = new Server(httpServer, {
   path: '/api/v2/machine/',
   cors: { origin: '*' }
 })
@@ -19,4 +23,4 @@ app.use(cors({
 app.use(express.json())
 app.use(authBearerParser())
 
-module.exports = { app, httpServer, io }
+module.exports = { app, httpServer, ioGame, ioMachine }

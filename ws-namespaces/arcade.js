@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { io } = require('../http-server.js')
+const { ioMachine } = require('../http-server.js')
 const Joi = require('joi')
 const db = require('../db.js')
 
@@ -11,7 +11,7 @@ const coinInsertedSchema = Joi.object({
   operation: Joi.number().integer().positive().allow(0).required()
 })
 
-io.of('/arcade').use(async (socket, next) => {
+ioMachine.of('/arcade').use(async (socket, next) => {
   try {
     const token = socket.handshake.auth.token
     jwt.verify(token, secretKeyArcade)
@@ -22,7 +22,7 @@ io.of('/arcade').use(async (socket, next) => {
   }
 })
 
-io.of('/arcade').on('connection', async (socket) => {
+ioMachine.of('/arcade').on('connection', async (socket) => {
   socket.on('coinInserted', (data) => {
     const { error } = coinInsertedSchema.validate(data)
     if (error) {
