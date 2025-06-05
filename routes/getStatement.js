@@ -1,49 +1,55 @@
-const express = require('express')
-const router = express.Router()
-const { OAuth2Client } = require('google-auth-library')
-const client = new OAuth2Client()
-const audience = process.env.GOOGLE_CLIENT_ID.split(' ')
-const db = require('../db.js')
+const express = require("express");
+const router = express.Router();
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client();
+const audience = process.env.GOOGLE_CLIENT_ID.split(" ");
+const db = require("../db.js");
 
-router.get('/statement', async (req, res) => {
-  let payload
-  let email
+router.get("/statement", async (req, res) => {
+  let payload;
+  let email;
 
   try {
     const ticket = await client.verifyIdToken({
       audience,
-      idToken: req.token
-    })
-    payload = ticket.getPayload()
-    email = payload.email
+      idToken: req.token,
+    });
+    payload = ticket.getPayload();
+    email = payload.email;
   } catch (err) {
-    console.error(err)
-    return res.sendStatus(401)
+    console.error(err);
+    return res.sendStatus(401);
   }
 
   try {
-    const auth = await db.query('SELECT "id" FROM "people" WHERE "email" = $1', [email])
+    const auth = await db.query(
+      'SELECT "id" FROM "people" WHERE "email" = $1',
+      [email],
+    );
     if (auth.rowCount === 0) {
-      return res.sendStatus(401)
+      return res.sendStatus(401);
     }
-    const userId = auth.rows[0].id
+    const userId = auth.rows[0].id;
 
-    let statementSearch = await db.query('SELECT "operations"."id" AS "operation", "from_person"."name" AS "from", "to_person"."name" AS "to", "products"."name" AS "product", "operations"."value" AS "value", TO_CHAR("operations"."date", \'DD/MM/YYYY HH24:MI:SS\') AS timestamp, "operations"."completed" AS completed FROM "operations" LEFT JOIN "people" AS from_person ON "operations"."from" = "from_person"."id" LEFT JOIN "people" AS "to_person" ON "operations"."to" = "to_person"."id" LEFT JOIN "products" ON "operations"."product" = "products"."id" WHERE "operations"."to" = $1 OR "operations"."from" = $1 ORDER BY "operations"."date" DESC;', [userId])
-    const statement = statementSearch.rows.map(statement => ({
+    let statementSearch = await db.query(
+      'SELECT "operations"."id" AS "operation", "from_person"."name" AS "from", "to_person"."name" AS "to", "products"."name" AS "product", "operations"."value" AS "value", TO_CHAR("operations"."date", \'DD/MM/YYYY HH24:MI:SS\') AS timestamp, "operations"."completed" AS completed FROM "operations" LEFT JOIN "people" AS from_person ON "operations"."from" = "from_person"."id" LEFT JOIN "people" AS "to_person" ON "operations"."to" = "to_person"."id" LEFT JOIN "products" ON "operations"."product" = "products"."id" WHERE "operations"."to" = $1 OR "operations"."from" = $1 ORDER BY "operations"."date" DESC;',
+      [userId],
+    );
+    const statement = statementSearch.rows.map((statement) => ({
       operation: statement.operation,
       from: statement.from,
       to: statement.to,
       product: statement.product,
       value: statement.value,
       timestamp: statement.timestamp,
-      completed: statement.completed
-    }))
+      completed: statement.completed,
+    }));
 
-    return res.status(200).json(statement)
+    return res.status(200).json(statement);
   } catch (err) {
-    console.error(err)
-    return res.sendStatus(500)
+    console.error(err);
+    return res.sendStatus(500);
   }
-})
+});
 
-module.exports = router
+module.exports = router;

@@ -9,11 +9,14 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0",
     "punycode": "^2.3.1",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4",
-    "standard": "*"
+    "@eslint/js": "^9.28.0",
+    "@eslint/json": "^0.12.0",
+    "@eslint/markdown": "^6.5.0",
+    "eslint": "^8.57.1",
+    "globals": "^16.2.0"
   },
   "engines": {
     "node": ">=18"

@@ -1,64 +1,76 @@
-const { io } = require('../http-server.js')
-const express = require('express')
-const router = express.Router()
-const { OAuth2Client } = require('google-auth-library')
-const Joi = require('joi')
-const client = new OAuth2Client()
-const audience = process.env.GOOGLE_CLIENT_ID.split(' ')
-const db = require('../db.js')
+const { io } = require("../http-server.js");
+const express = require("express");
+const router = express.Router();
+const { OAuth2Client } = require("google-auth-library");
+const Joi = require("joi");
+const client = new OAuth2Client();
+const audience = process.env.GOOGLE_CLIENT_ID.split(" ");
+const db = require("../db.js");
 
 const MfaSchema = Joi.object({
   operation: Joi.number().integer().positive().required(),
   code: Joi.number().integer().min(10).max(99).required(),
-})
+});
 
-router.post('/mfa', async (req, res) => {
-  let payload
-  let email
+router.post("/mfa", async (req, res) => {
+  let payload;
+  let email;
   try {
     const ticket = await client.verifyIdToken({
       audience,
-      idToken: req.token
-    })
-    payload = ticket.getPayload()
-    email = payload.email
+      idToken: req.token,
+    });
+    payload = ticket.getPayload();
+    email = payload.email;
   } catch (err) {
-    console.error(err)
-    return res.sendStatus(401)
+    console.error(err);
+    return res.sendStatus(401);
   }
 
   try {
-    const { error } = MfaSchema.validate(req.body)
+    const { error } = MfaSchema.validate(req.body);
     if (error) {
-      return res.status(400).send({ error: error.details[0].message })
+      return res.status(400).send({ error: error.details[0].message });
     }
 
-    const auth = await db.query('SELECT "id" FROM "people" WHERE "email" = $1;', [email])
+    const auth = await db.query(
+      'SELECT "id" FROM "people" WHERE "email" = $1;',
+      [email],
+    );
     if (auth.rowCount === 0) {
-      return res.status(401).send("Usuario Não Existente no Banco de Dados!")
+      return res.status(401).send("Usuario Não Existente no Banco de Dados!");
     }
-    const { operation, code } = req.body
+    const { operation, code } = req.body;
 
-    const operationSearch = await db.query('SELECT "mfa", "product" from "operations" WHERE "id" = $1;', [operation])
+    const operationSearch = await db.query(
+      'SELECT "mfa", "product" from "operations" WHERE "id" = $1;',
+      [operation],
+    );
     if (operationSearch.rowCount === 0) {
-      return res.status(403).send("Operação não encontrada para esse usuário!")
+      return res.status(403).send("Operação não encontrada para esse usuário!");
     }
-    const MfaNumber = operationSearch.rows[0].mfa
-    const product = operationSearch.rows[0].product
+    const MfaNumber = operationSearch.rows[0].mfa;
+    const product = operationSearch.rows[0].product;
 
     if (MfaNumber != code) {
-      return res.status(403).send("Código MFA inválido.\nTente novamente!")
+      return res.status(403).send("Código MFA inválido.\nTente novamente!");
     }
 
-    let stockSearchSlot = await db.query('SELECT "slot" FROM "stock" WHERE "product" = $1 and machine = (SELECT "id" from "machines" where "name" LIKE \'vending-machine%\' LIMIT 1);', [product])
-    const slot = stockSearchSlot.rows[0].slot
-    io.of('/vending-machine').emit('stateReleasing', { product: slot, operation: operation })
+    let stockSearchSlot = await db.query(
+      'SELECT "slot" FROM "stock" WHERE "product" = $1 and machine = (SELECT "id" from "machines" where "name" LIKE \'vending-machine%\' LIMIT 1);',
+      [product],
+    );
+    const slot = stockSearchSlot.rows[0].slot;
+    io.of("/vending-machine").emit("stateReleasing", {
+      product: slot,
+      operation: operation,
+    });
 
-    return res.sendStatus(200)
+    return res.sendStatus(200);
   } catch (err) {
-    console.error(err)
-    return res.sendStatus(500)
+    console.error(err);
+    return res.sendStatus(500);
   }
-})
+});
 
-module.exports = router
+module.exports = router;
