@@ -1,4 +1,4 @@
-const { io } = require("../http-server.js");
+const { ioMachine } = require("../http-server.js");
 const express = require("express");
 const router = express.Router();
 const { OAuth2Client } = require("google-auth-library");
@@ -123,7 +123,7 @@ router.post("/debit", async (req, res) => {
         operation: operationId,
       };
 
-      io.of("/vending-machine").emit("stateMFA", stateMfaObject);
+      ioMachine.of("/vending-machine").emit("stateMFA", stateMfaObject);
       setTimeout(() => {
         db.query('UPDATE "machines" SET "busy" = false WHERE "id" = $1', [
           machine,
@@ -146,7 +146,7 @@ router.post("/debit", async (req, res) => {
       }
       const slot = stockSearch.rows[0].slot;
 
-      io.of("/arcade").emit("coinInsert", {
+      ioMachine.of("/arcade").emit("coinInsert", {
         arcade: slot,
         coins: 1,
         operation: operationId,
